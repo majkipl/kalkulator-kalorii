@@ -1,12 +1,16 @@
 import React, {useState, useRef} from 'react';
 import Select from 'react-select';
 import {LucideX, LucideCat} from 'lucide-react';
-import {getCustomSelectStyles} from '../../utils/formStyles';
+
+// Importy hooków i stylów
 import {useAppContext} from '../../context/AppContext';
+import {formStyles, getCustomSelectStyles} from '../../utils/formStyles';
 
 const FoodFormModal = ({onSave, onCancel, initialData}) => {
+    // Pobieramy dane globalne z kontekstu
     const {theme, showToast} = useAppContext();
 
+    // Stany lokalne
     const [formData, setFormData] = useState({
         name: initialData?.name || '',
         type: initialData?.type || 'mokra',
@@ -16,11 +20,12 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef(null);
 
-    const inputClassName = "mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
+    // Style dla react-select
     const foodTypeOptions = [{value: 'mokra', label: 'Mokra'}, {value: 'sucha', label: 'Sucha'}];
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const customStyles = getCustomSelectStyles(isDark);
 
+    // Handlery
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -110,34 +115,35 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                             </div>
                             <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef}
                                    className="hidden"/>
+                            {/* Zastosowanie ujednoliconego stylu dla przycisku */}
                             <button type="button" onClick={() => fileInputRef.current.click()}
-                                    className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg text-sm">
+                                    className={`${formStyles.buttonSecondary} w-auto text-sm`}>
                                 {isProcessing ? 'Przetwarzam...' : 'Wybierz zdjęcie'}
                             </button>
                         </div>
                     </div>
 
-                    <div><label className="block text-sm font-medium">Nazwa karmy</label><input type="text" name="name"
-                                                                                                value={formData.name}
-                                                                                                onChange={handleChange}
-                                                                                                className={inputClassName}
-                                                                                                required/></div>
-                    <div><label className="block text-sm font-medium">Kaloryczność (kcal / 100g)</label><input
-                        type="number" name="calories" value={formData.calories} onChange={handleChange}
-                        className={inputClassName} required/></div>
-                    <div><label className="block text-sm font-medium">Typ karmy</label><Select name="type"
-                                                                                               options={foodTypeOptions}
-                                                                                               value={foodTypeOptions.find(o => o.value === formData.type)}
-                                                                                               onChange={handleSelectChange}
-                                                                                               styles={customStyles}
-                                                                                               className="mt-1"/></div>
+                    <div>
+                        <label className="block text-sm font-medium">Nazwa karmy</label>
+                        <input type="text" name="name" value={formData.name} onChange={handleChange}
+                               className={formStyles.input} required/>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium">Kaloryczność (kcal / 100g)</label>
+                        <input type="number" name="calories" value={formData.calories} onChange={handleChange}
+                               className={formStyles.input} required/>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium">Typ karmy</label>
+                        <Select name="type" options={foodTypeOptions}
+                                value={foodTypeOptions.find(o => o.value === formData.type)}
+                                onChange={handleSelectChange} styles={customStyles} className="mt-1"/>
+                    </div>
 
                     <div className="flex justify-end space-x-3 pt-4">
-                        <button type="button" onClick={onCancel}
-                                className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg transition">Anuluj
-                        </button>
+                        <button type="button" onClick={onCancel} className={formStyles.buttonSecondary}>Anuluj</button>
                         <button type="submit" disabled={isProcessing}
-                                className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50">{initialData ? 'Zapisz zmiany' : 'Dodaj karmę'}</button>
+                                className={formStyles.buttonPrimary}>{initialData ? 'Zapisz zmiany' : 'Dodaj karmę'}</button>
                     </div>
                 </form>
             </div>

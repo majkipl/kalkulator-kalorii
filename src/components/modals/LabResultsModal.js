@@ -3,10 +3,11 @@ import {collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc} from 'fi
 import {db} from '../../firebase/config';
 import {userCatsCollectionPath} from '../../firebase/paths';
 
-// Importy hooków i komponentów
+// Importy hooków, komponentów i stylów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 import Spinner from '../../shared/Spinner';
+import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 import {LucideX, LucidePlusCircle, LucideTrash2} from 'lucide-react';
 
 const LabResultsModal = ({catId, onCancel}) => {
@@ -14,7 +15,7 @@ const LabResultsModal = ({catId, onCancel}) => {
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
-    // Stany lokalne (bez zmian)
+    // Stany lokalne
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -26,9 +27,7 @@ const LabResultsModal = ({catId, onCancel}) => {
         date: new Date().toISOString().split('T')[0]
     });
 
-    // Teraz `user` jest dostępny z kontekstu, więc `user.uid` będzie działać
     const catsPath = userCatsCollectionPath(user.uid);
-    const inputClassName = "w-full border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
 
     useEffect(() => {
         const resultsCol = collection(db, catsPath, catId, 'labResults');
@@ -83,35 +82,38 @@ const LabResultsModal = ({catId, onCancel}) => {
                 </div>
                 {loading ? <Spinner/> : (
                     <div className="flex-grow overflow-y-auto pr-2">
-                        <button onClick={() => setIsAdding(!isAdding)}
-                                className="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/80 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center mb-4">
-                            <LucidePlusCircle className="mr-2 h-5 w-5"/> {isAdding ? 'Anuluj' : 'Dodaj nowy wynik'}
+                        {/* 2. Zastosowanie ujednoliconego stylu */}
+                        <button onClick={() => setIsAdding(!isAdding)} className={`${formStyles.buttonTertiary} mb-4`}>
+                            <LucidePlusCircle
+                                className="mr-2 h-5 w-5"/> {isAdding ? 'Anuluj dodawanie' : 'Dodaj nowy wynik'}
                         </button>
                         {isAdding && (
                             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 space-y-3">
+                                {/* 3. Zastosowanie ujednoliconych stylów dla inputów */}
                                 <input value={newResult.testName}
                                        onChange={e => setNewResult({...newResult, testName: e.target.value})}
-                                       placeholder="Nazwa badania (np. Kreatynina)" className={inputClassName}/>
+                                       placeholder="Nazwa badania (np. Kreatynina)" className={formStyles.input}/>
                                 <div className="grid grid-cols-3 gap-2">
                                     <input value={newResult.result}
                                            onChange={e => setNewResult({...newResult, result: e.target.value})}
-                                           placeholder="Wynik" className={inputClassName}/>
+                                           placeholder="Wynik" className={formStyles.input}/>
                                     <input value={newResult.unit}
                                            onChange={e => setNewResult({...newResult, unit: e.target.value})}
-                                           placeholder="Jednostka" className={inputClassName}/>
+                                           placeholder="Jednostka" className={formStyles.input}/>
                                     <input value={newResult.referenceRange}
                                            onChange={e => setNewResult({...newResult, referenceRange: e.target.value})}
-                                           placeholder="Zakres ref." className={inputClassName}/>
+                                           placeholder="Zakres ref." className={formStyles.input}/>
                                 </div>
                                 <input type="date" value={newResult.date}
                                        onChange={e => setNewResult({...newResult, date: e.target.value})}
-                                       className={inputClassName}/>
+                                       className={formStyles.input}/>
                                 <div className="flex justify-end gap-2">
+                                    {/* 4. Zastosowanie ujednoliconych stylów dla przycisków akcji */}
                                     <button onClick={() => setIsAdding(false)}
-                                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded">Anuluj
+                                            className={`${formStyles.buttonSecondary} w-auto text-sm px-3 py-1.5`}>Anuluj
                                     </button>
                                     <button onClick={handleAddResult}
-                                            className="bg-indigo-500 text-white px-3 py-1 rounded">Zapisz
+                                            className={`${formStyles.buttonPrimary} w-auto text-sm px-3 py-1.5`}>Zapisz
                                     </button>
                                 </div>
                             </div>

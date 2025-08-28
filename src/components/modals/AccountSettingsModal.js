@@ -10,16 +10,17 @@ import {auth} from '../../firebase/config';
 import Spinner from '../../shared/Spinner';
 import {LucideX, LucideCheckCircle} from 'lucide-react';
 
-// Importy hooków
+// Importy hooków i stylów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
+import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 
 const AccountSettingsModal = ({onCancel}) => {
-    // Pobieramy dane globalne bezpośrednio w komponencie
+    // Pobieramy dane globalne
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
-    // Stany lokalne (bez zmian)
+    // Stany lokalne
     const [isLinking, setIsLinking] = useState(false);
     const [showPasswordFields, setShowPasswordFields] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
@@ -27,7 +28,6 @@ const AccountSettingsModal = ({onCancel}) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-    // `user` jest teraz pobierany z kontekstu i nie będzie `undefined`
     const isGoogleLinked = user.providerData.some(provider => provider.providerId === 'google.com');
     const isEmailProvider = user.providerData.some(provider => provider.providerId === 'password');
 
@@ -83,9 +83,6 @@ const AccountSettingsModal = ({onCancel}) => {
         }
     };
 
-    // Reszta komponentu bez zmian
-    const inputClassName = "w-full border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
-
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
@@ -106,8 +103,8 @@ const AccountSettingsModal = ({onCancel}) => {
                                 Konto połączone z Google.
                             </div>
                         ) : (
-                            <button onClick={handleLinkGoogle} disabled={isLinking}
-                                    className="w-full flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-semibold py-2 px-4 rounded-lg transition hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+                            // 2. Zastosowanie ujednoliconego stylu
+                            <button onClick={handleLinkGoogle} disabled={isLinking} className={formStyles.buttonGoogle}>
                                 {isLinking ? <Spinner/> : (<>
                                     <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48">
                                         <path fill="#FFC107"
@@ -129,29 +126,33 @@ const AccountSettingsModal = ({onCancel}) => {
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                             <h3 className="text-sm font-medium mb-2">Zmień hasło</h3>
                             {!showPasswordFields ? (
+                                // 3. Zastosowanie ujednoliconego stylu
                                 <button onClick={() => setShowPasswordFields(true)}
-                                        className="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/80 font-bold py-2 px-4 rounded-lg transition">
+                                        className={formStyles.buttonTertiary}>
                                     Zmień hasło
                                 </button>
                             ) : (
                                 <form onSubmit={handleChangePassword}
                                       className="space-y-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                    {/* 4. Zastosowanie ujednoliconych stylów dla inputów */}
                                     <div><input type="password" value={currentPassword}
                                                 onChange={e => setCurrentPassword(e.target.value)}
-                                                placeholder="Aktualne hasło" className={inputClassName} required/></div>
+                                                placeholder="Aktualne hasło" className={formStyles.input} required/>
+                                    </div>
                                     <div><input type="password" value={newPassword}
                                                 onChange={e => setNewPassword(e.target.value)} placeholder="Nowe hasło"
-                                                className={inputClassName} required/></div>
+                                                className={formStyles.input} required/></div>
                                     <div><input type="password" value={confirmPassword}
                                                 onChange={e => setConfirmPassword(e.target.value)}
-                                                placeholder="Potwierdź nowe hasło" className={inputClassName} required/>
-                                    </div>
+                                                placeholder="Potwierdź nowe hasło" className={formStyles.input}
+                                                required/></div>
                                     <div className="flex justify-end gap-2 pt-2">
+                                        {/* 5. Zastosowanie ujednoliconych stylów dla przycisków akcji */}
                                         <button type="button" onClick={() => setShowPasswordFields(false)}
-                                                className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm">Anuluj
+                                                className={`${formStyles.buttonSecondary} w-auto text-sm px-3 py-1.5`}>Anuluj
                                         </button>
                                         <button type="submit" disabled={isChangingPassword}
-                                                className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm disabled:opacity-50 flex items-center">
+                                                className={`${formStyles.buttonPrimary} w-auto text-sm px-3 py-1.5`}>
                                             {isChangingPassword ? <Spinner/> : 'Zapisz zmianę'}
                                         </button>
                                     </div>
@@ -161,9 +162,7 @@ const AccountSettingsModal = ({onCancel}) => {
                     )}
                 </div>
                 <div className="flex justify-end pt-6">
-                    <button onClick={onCancel}
-                            className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg">Zamknij
-                    </button>
+                    <button onClick={onCancel} className={formStyles.buttonSecondary}>Zamknij</button>
                 </div>
             </div>
         </div>

@@ -2,8 +2,11 @@ import React, {useState} from 'react';
 import Select from 'react-select';
 import {LucideSave, LucideTrash2} from 'lucide-react';
 import {getCustomSelectStyles} from '../utils/formStyles';
+import { useAppContext } from '../context/AppContext';
 
-const CatProfileForm = ({cat, onSave, onCancel, theme, onDeleteRequest}) => {
+const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
+    const { theme } = useAppContext();
+
     // Stan dla lat i miesięcy, ułatwiający edycję wieku
     const [years, setYears] = useState(cat ? Math.floor(cat.age) : '1');
     const [months, setMonths] = useState(cat ? Math.round((cat.age - Math.floor(cat.age)) * 12) : '0');

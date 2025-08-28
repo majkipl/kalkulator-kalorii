@@ -1,25 +1,24 @@
-import React, { useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
-import { userCatsCollectionPath } from '../../firebase/paths';
+import React, {useState} from 'react';
+import {doc, getDoc} from 'firebase/firestore';
+import {db} from '../../firebase/config';
+import {userCatsCollectionPath} from '../../firebase/paths';
 
-// Importy hooków z Context API
-import { useAuth } from '../../context/AuthContext';
-import { useAppContext } from '../../context/AppContext';
+// Importy hooków i stylów
+import {useAuth} from '../../context/AuthContext';
+import {useAppContext} from '../../context/AppContext';
+import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 
-const ExportModal = ({ catId, onCancel }) => {
-    // Pobieramy dane globalne bezpośrednio w komponencie
-    const { user } = useAuth();
-    const { showToast } = useAppContext();
+const ExportModal = ({catId, onCancel}) => {
+    // Pobieramy dane globalne
+    const {user} = useAuth();
+    const {showToast} = useAppContext();
 
-    // Stany lokalne (bez zmian)
+    // Stany lokalne
     const today = new Date().toISOString().split('T')[0];
     const [startDate, setStartDate] = useState(today);
     const [endDate, setEndDate] = useState(today);
 
-    // Teraz `user` jest dostępny z kontekstu, więc `user.uid` będzie działać
     const catsPath = userCatsCollectionPath(user.uid);
-    const inputClassName = "mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
 
     const handleExport = async () => {
         try {
@@ -32,7 +31,7 @@ const ExportModal = ({ catId, onCancel }) => {
                 const mealDocRef = doc(db, catsPath, catId, 'meals', dateString);
                 const mealDoc = await getDoc(mealDocRef);
                 if (mealDoc.exists()) {
-                    const dailyMeals = mealDoc.data().meals.map(meal => ({ ...meal, date: dateString }));
+                    const dailyMeals = mealDoc.data().meals.map(meal => ({...meal, date: dateString}));
                     allMeals.push(...dailyMeals);
                 }
             }
@@ -47,7 +46,7 @@ const ExportModal = ({ catId, onCancel }) => {
                 `${m.date},"${m.foodName}",${m.foodType},${m.weight},${Math.round(m.calories)}`
             ).join("\n");
 
-            const blob = new Blob([headers + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([headers + csvContent], {type: 'text/csv;charset=utf-8;'});
             const link = document.createElement("a");
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
@@ -73,16 +72,21 @@ const ExportModal = ({ catId, onCancel }) => {
                 <div className="space-y-4 text-gray-700 dark:text-gray-300">
                     <div>
                         <label className="block text-sm font-medium">Data początkowa</label>
-                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputClassName} />
+                        {/* 2. Zastosowanie ujednoliconych stylów */}
+                        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+                               className={formStyles.input}/>
                     </div>
                     <div>
                         <label className="block text-sm font-medium">Data końcowa</label>
-                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={inputClassName} />
+                        {/* 2. Zastosowanie ujednoliconych stylów */}
+                        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                               className={formStyles.input}/>
                     </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-6">
-                    <button onClick={onCancel} className="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg">Anuluj</button>
-                    <button onClick={handleExport} className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Eksportuj</button>
+                    {/* 3. Zastosowanie ujednoliconych stylów */}
+                    <button onClick={onCancel} className={formStyles.buttonSecondary}>Anuluj</button>
+                    <button onClick={handleExport} className={formStyles.buttonPrimary}>Eksportuj</button>
                 </div>
             </div>
         </div>

@@ -117,7 +117,6 @@ const DailyHealthLog = ({catId, currentDate, initialData}) => {
                     <label
                         className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"><LucidePill
                         size={16} className="mr-2"/>Leki / Suplementy</label>
-                    {/* ===== POPRAWIONA LINIA PONIŻEJ ===== */}
                     <textarea value={healthData.medications}
                               onChange={(e) => setHealthData(p => ({...p, medications: e.target.value}))}
                               className={`${formStyles.textarea} h-16`}/>

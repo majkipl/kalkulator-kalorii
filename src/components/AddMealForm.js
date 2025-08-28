@@ -3,14 +3,16 @@ import Select from 'react-select';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale-subtle.css';
-import {getCustomSelectStyles} from '../utils/formStyles';
+import {formStyles, getCustomSelectStyles} from '../utils/formStyles';
 import {LucidePlusCircle, LucideBone} from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
-const AddMealForm = ({foods, onSave, theme}) => {
+const AddMealForm = ({foods, onSave}) => {
+    const { theme } = useAppContext();
     const [selectedFoodId, setSelectedFoodId] = useState('');
     const [weight, setWeight] = useState('');
 
-    const inputClassName = "block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
+    // const inputClassName = "block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 min-h-[38px] px-3 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm";
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const customStyles = getCustomSelectStyles(isDark);
 
@@ -100,7 +102,7 @@ const AddMealForm = ({foods, onSave, theme}) => {
                 <div>
                     <label className="block text-sm font-medium mb-1">Ilość (g)</label>
                     <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
-                           className={inputClassName} placeholder="np. 50" required/>
+                           className={formStyles.input} placeholder="np. 50" required/>
                 </div>
             </div>
             <button type="submit"
