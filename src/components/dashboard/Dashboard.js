@@ -242,8 +242,14 @@ const Dashboard = () => {
 
     const visibleFoods = useMemo(() => foods.filter(food => !hiddenFoodIds.includes(food.id)), [foods, hiddenFoodIds]);
 
-    if (loading || !cat) {
+    if (loading) {
         return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center"><Spinner /></div>;
+    }
+
+    if (!cat) {
+        // Ten stan będzie widoczny tylko przez chwilę przed przekierowaniem,
+        // ale to dobra praktyka na wypadek błędów.
+        return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center"><p>Profil kota nie został znaleziony.</p></div>;
     }
 
     return (
