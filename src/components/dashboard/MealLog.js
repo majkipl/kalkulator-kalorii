@@ -4,6 +4,7 @@ import {
     LucideCalendarDays, LucideChevronDown, LucideChevronLeft, LucideChevronRight,
     LucideAlertTriangle, LucideClipboardEdit, LucideTrash2
 } from 'lucide-react';
+import {typographyStyles} from "../../utils/formStyles";
 
 const MealLog = ({
                      cat,
@@ -26,7 +27,7 @@ const MealLog = ({
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                <h2 className={`${typographyStyles.h2} flex items-center`}>
                     <LucideCalendarDays className="mr-2 h-6 w-6 text-indigo-500"/> Dziennik Posiłków
                 </h2>
                 <LucideChevronDown
@@ -84,7 +85,7 @@ const MealLog = ({
                         <AddMealForm foods={foods} onSave={onAddMeal} theme={theme}/>
 
                         <div className="mt-6 space-y-3">
-                            <h3 className="font-semibold text-gray-600 dark:text-gray-300">Posiłki z wybranego
+                            <h3 className={typographyStyles.h3}>Posiłki z wybranego
                                 dnia:</h3>
                             {meals.length > 0 ? (
                                 meals.sort((a, b) => new Date(b.timestamp.seconds * 1000) - new Date(a.timestamp.seconds * 1000)).map(meal => (

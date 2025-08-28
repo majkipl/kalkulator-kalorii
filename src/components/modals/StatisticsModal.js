@@ -11,6 +11,7 @@ import {LucideX} from 'lucide-react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale-subtle.css';
+import {typographyStyles} from "../../utils/formStyles";
 
 const StatisticsModal = ({catId, onCancel}) => {
     // Pobieramy dane o użytkowniku bezpośrednio z kontekstu
@@ -89,7 +90,7 @@ const StatisticsModal = ({catId, onCancel}) => {
                 className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl animate-fade-in-up flex flex-col"
                 style={{maxHeight: '90vh'}}>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Statystyki z
+                    <h2 className={typographyStyles.h2}>Statystyki z
                         ostatnich {timeRange} dni</h2>
                     <button type="button" onClick={onCancel}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>

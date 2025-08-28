@@ -6,7 +6,7 @@ import {userCatsCollectionPath} from '../../firebase/paths';
 // Importy hooków i stylów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
-import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 
 const ExportModal = ({catId, onCancel}) => {
     // Pobieramy dane globalne
@@ -68,23 +68,20 @@ const ExportModal = ({catId, onCancel}) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Eksportuj dane żywieniowe</h2>
+                <h2 className={`${typographyStyles.h2} mb-4`}>Eksportuj dane żywieniowe</h2>
                 <div className="space-y-4 text-gray-700 dark:text-gray-300">
                     <div>
-                        <label className="block text-sm font-medium">Data początkowa</label>
-                        {/* 2. Zastosowanie ujednoliconych stylów */}
+                        <label className={typographyStyles.label}>Data początkowa</label>
                         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
                                className={formStyles.input}/>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Data końcowa</label>
-                        {/* 2. Zastosowanie ujednoliconych stylów */}
+                        <label className={typographyStyles.label}>Data końcowa</label>
                         <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
                                className={formStyles.input}/>
                     </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-6">
-                    {/* 3. Zastosowanie ujednoliconych stylów */}
                     <button onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
                     <button onClick={handleExport} className={formStyles.buttonSubmit}>Eksportuj</button>
                 </div>

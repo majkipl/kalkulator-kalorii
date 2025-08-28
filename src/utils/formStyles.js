@@ -11,6 +11,14 @@ const buttonSuccessClasses = "bg-green-500 hover:bg-green-600 text-white h-10";
 const buttonTertiaryClasses = "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/80";
 const buttonGoogleClasses = "bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-600";
 
+export const typographyStyles = {
+    h1: "text-3xl font-bold text-gray-800 dark:text-gray-200",
+    h2: "text-xl font-bold text-gray-800 dark:text-gray-200",
+    h3: "font-semibold text-gray-600 dark:text-gray-300",
+    label: "block text-sm font-medium text-gray-700 dark:text-gray-300",
+    checkbox: "h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500",
+};
+
 export const formStyles = {
     // Style dla pól tekstowych
     input: `${inputBase} min-h-[38px] px-3`,

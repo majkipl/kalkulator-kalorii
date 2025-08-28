@@ -3,7 +3,7 @@ import Select from 'react-select';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale-subtle.css';
-import {formStyles, getCustomSelectStyles} from '../utils/formStyles';
+import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/formStyles';
 import {LucidePlusCircle, LucideBone} from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
@@ -93,14 +93,14 @@ const AddMealForm = ({foods, onSave}) => {
         <form onSubmit={handleSubmit} className="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start text-gray-700 dark:text-gray-300">
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-1">Wybierz karmę</label>
+                    <label className={`${typographyStyles.label} mb-1`}>Wybierz karmę</label>
                     <Select styles={customStyles} options={foodOptions}
                             value={foodOptions.find(o => o.value === selectedFoodId)} onChange={handleSelectChange}
                             placeholder="Wyszukaj lub wybierz karmę..." isClearable required
                             components={{Option: CustomOption, SingleValue: CustomSingleValue}}/>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-1">Ilość (g)</label>
+                    <label className={`${typographyStyles.label} mb-1`}>Ilość (g)</label>
                     <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
                            className={formStyles.input} placeholder="np. 50" required/>
                 </div>

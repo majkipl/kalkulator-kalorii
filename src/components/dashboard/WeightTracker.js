@@ -10,7 +10,7 @@ import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 
 // Importy do stylów i wizualizacji
-import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {LucideLineChart, LucideChevronDown} from 'lucide-react';
 
@@ -71,7 +71,7 @@ const WeightTracker = ({catId, collapsible}) => {
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                <h2 className={`${typographyStyles.h2} flex items-center`}>
                     <LucideLineChart className="mr-2 h-6 w-6 text-indigo-500"/> Historia wagi
                 </h2>
                 <LucideChevronDown

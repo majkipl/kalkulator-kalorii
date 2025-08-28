@@ -13,7 +13,7 @@ import {LucideX, LucideCheckCircle} from 'lucide-react';
 // Importy hooków i stylów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
-import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 
 const AccountSettingsModal = ({onCancel}) => {
     // Pobieramy dane globalne
@@ -87,7 +87,7 @@ const AccountSettingsModal = ({onCancel}) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Ustawienia konta</h2>
+                    <h2 className={typographyStyles.h2}>Ustawienia konta</h2>
                     <button type="button" onClick={onCancel}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>
                 </div>

@@ -3,7 +3,7 @@ import Select from 'react-select';
 
 // Importy hooków i stylów
 import {useAppContext} from '../../context/AppContext';
-import {formStyles, getCustomSelectStyles} from '../../utils/formStyles';
+import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/formStyles';
 
 const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
     // Pobieramy dane globalne bezpośrednio w komponencie
@@ -50,9 +50,9 @@ const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
                 <form onSubmit={handleSubmit} className="space-y-4 text-gray-700 dark:text-gray-300">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Edytuj posiłek</h2>
+                    <h2 className={typographyStyles.h2}>Edytuj posiłek</h2>
                     <div>
-                        <label className="block text-sm font-medium">Karma</label>
+                        <label className={typographyStyles.label}>Karma</label>
                         <Select
                             className="mt-1"
                             styles={customStyles}
@@ -63,7 +63,7 @@ const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Ilość (g)</label>
+                        <label className={typographyStyles.label}>Ilość (g)</label>
                         {/* 1. Zastosowanie ujednoliconego stylu */}
                         <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
                                className={formStyles.input} required/>

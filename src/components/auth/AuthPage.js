@@ -12,7 +12,7 @@ import {LucideCat} from 'lucide-react';
 // Importy hooków z React Router i Context API
 import {useNavigate} from 'react-router-dom';
 import {useAppContext} from '../../context/AppContext';
-import {formStyles} from '../../utils/formStyles';
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 
 const AuthPage = () => {
     // Pobieramy potrzebne funkcje z hooków
@@ -137,7 +137,7 @@ const AuthPage = () => {
             <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
                 <div className="flex items-center justify-center mb-6">
                     <LucideCat className="h-12 w-12 text-indigo-500"/>
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 ml-4">Dziennik Kota</h1>
+                    <h1 className={`${typographyStyles.h1} ml-4`}>Dziennik Kota</h1>
                 </div>
                 {renderForm()}
                 <div className="relative flex py-5 items-center">

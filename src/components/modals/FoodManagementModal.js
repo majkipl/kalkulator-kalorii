@@ -6,7 +6,7 @@ import 'tippy.js/animations/scale-subtle.css';
 // Importy hooków, komponentów i stylów
 import {useAuth} from '../../context/AuthContext';
 import ConfirmationModal from './ConfirmationModal';
-import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 import {LucideX, LucideBone, LucideClipboardEdit, LucideTrash2, LucideEye, LucideEyeOff} from 'lucide-react';
 
 const FoodManagementModal = ({foods, hiddenFoodIds, onToggleHide, onCancel, onEdit, onDelete}) => {
@@ -70,7 +70,7 @@ const FoodManagementModal = ({foods, hiddenFoodIds, onToggleHide, onCancel, onEd
                 className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl animate-fade-in-up flex flex-col"
                 style={{maxHeight: '90vh'}}>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Zarządzaj karmami</h2>
+                    <h2 className={typographyStyles.h2}>Zarządzaj karmami</h2>
                     <button type="button" onClick={onCancel}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>
                 </div>
@@ -83,9 +83,9 @@ const FoodManagementModal = ({foods, hiddenFoodIds, onToggleHide, onCancel, onEd
                         className={formStyles.input} // 2. Zastosowanie ujednoliconego stylu
                     />
                     <label
-                        className="flex items-center whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                        className={`${typographyStyles.label} flex items-center whitespace-nowrap cursor-pointer`}>
                         <input type="checkbox" checked={showHidden} onChange={(e) => setShowHidden(e.target.checked)}
-                               className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-2"/>
+                               className={`${typographyStyles.checkbox} mr-2`}/>
                         Pokaż ukryte
                     </label>
                 </div>

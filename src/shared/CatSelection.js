@@ -11,6 +11,7 @@ import { useAppContext } from '../context/AppContext';
 import CatProfileForm from '../components/CatProfileForm';
 import Spinner from './Spinner';
 import { LucideCat, LucideChevronRight, LucidePlusCircle, LucideLogOut } from 'lucide-react';
+import {typographyStyles} from "../utils/formStyles";
 
 const CatSelection = () => {
     // Pobieramy dane globalne
@@ -70,7 +71,7 @@ const CatSelection = () => {
             <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
                 <div className="flex items-center justify-center mb-6">
                     <LucideCat className="h-12 w-12 text-indigo-500" />
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 ml-4">Dziennik Kota</h1>
+                    <h1 className={`${typographyStyles.h1} ml-4`}>Dziennik Kota</h1>
                 </div>
                 <h2 className="text-xl text-center text-gray-600 dark:text-gray-300 mb-8">Wybierz profil lub stwórz nowy</h2>
 

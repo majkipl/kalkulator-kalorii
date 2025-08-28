@@ -5,6 +5,7 @@ import {
     LucideBookUser, LucideClipboardEdit, LucideChevronDown, LucideCat, LucideWeight,
     LucideTarget, LucideSprout, LucideBone, LucideActivity, LucideHeartPulse, LucideStethoscope
 } from 'lucide-react';
+import {typographyStyles} from "../../utils/formStyles";
 
 const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, theme, collapsible}) => {
     const physiologicalStateText = {
@@ -49,7 +50,7 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                <h2 className={`${typographyStyles.h2} flex items-center`}>
                     <LucideBookUser className="mr-2 h-6 w-6 text-indigo-500"/> Profil kota
                 </h2>
                 <div className="flex items-center">

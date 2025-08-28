@@ -7,7 +7,7 @@ import {userCatsCollectionPath} from '../../firebase/paths';
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 import Spinner from '../../shared/Spinner';
-import {formStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
 import {LucideX, LucidePlusCircle, LucideTrash2} from 'lucide-react';
 
 const LabResultsModal = ({catId, onCancel}) => {
@@ -76,7 +76,7 @@ const LabResultsModal = ({catId, onCancel}) => {
                 className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-3xl animate-fade-in-up flex flex-col"
                 style={{maxHeight: '90vh'}}>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Wyniki badań laboratoryjnych</h2>
+                    <h2 className={typographyStyles.h2}>Wyniki badań laboratoryjnych</h2>
                     <button type="button" onClick={onCancel}
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>
                 </div>

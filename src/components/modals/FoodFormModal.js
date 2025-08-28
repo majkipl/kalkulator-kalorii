@@ -4,7 +4,7 @@ import {LucideX, LucideCat} from 'lucide-react';
 
 // Importy hooków i stylów
 import {useAppContext} from '../../context/AppContext';
-import {formStyles, getCustomSelectStyles} from '../../utils/formStyles';
+import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/formStyles';
 
 const FoodFormModal = ({onSave, onCancel, initialData}) => {
     // Pobieramy dane globalne z kontekstu
@@ -96,13 +96,13 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
                 <form onSubmit={handleSubmit} className="space-y-4 text-gray-700 dark:text-gray-300">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{initialData ? 'Edytuj karmę' : 'Dodaj nową karmę'}</h2>
+                        <h2 className={typographyStyles.h2}>{initialData ? 'Edytuj karmę' : 'Dodaj nową karmę'}</h2>
                         <button type="button" onClick={onCancel}
                                 className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium">Zdjęcie karmy</label>
+                        <label className={typographyStyles.label}>Zdjęcie karmy</label>
                         <div className="mt-1 flex items-center gap-4">
                             <div
                                 className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
@@ -124,17 +124,17 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium">Nazwa karmy</label>
+                        <label className={typographyStyles.label}>Nazwa karmy</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange}
                                className={formStyles.input} required/>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Kaloryczność (kcal / 100g)</label>
+                        <label className={typographyStyles.label}>Kaloryczność (kcal / 100g)</label>
                         <input type="number" name="calories" value={formData.calories} onChange={handleChange}
                                className={formStyles.input} required/>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Typ karmy</label>
+                        <label className={typographyStyles.label}>Typ karmy</label>
                         <Select name="type" options={foodTypeOptions}
                                 value={foodTypeOptions.find(o => o.value === formData.type)}
                                 onChange={handleSelectChange} styles={customStyles} className="mt-1"/>

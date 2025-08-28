@@ -3,6 +3,7 @@ import {
     LucideBone, LucideChevronDown, LucideSettings, LucidePlusCircle, LucideList,
     LucideBarChart3, LucideDownload, LucideTestTube
 } from 'lucide-react';
+import {typographyStyles} from "../../utils/formStyles";
 
 const Tools = ({
                    onAccountSettingsClick,
@@ -16,7 +17,7 @@ const Tools = ({
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                <h2 className={`${typographyStyles.h2} flex items-center`}>
                     <LucideBone className="mr-2 h-6 w-6 text-indigo-500"/>Narzędzia
                 </h2>
                 <LucideChevronDown

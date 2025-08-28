@@ -13,7 +13,7 @@ import {
     LucideNotebookText, LucideChevronDown, LucideDroplets, LucidePill, LucideTag, LucideClipboardEdit
 } from 'lucide-react';
 
-import {formStyles} from '../../utils/formStyles';
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 
 const DailyHealthLog = ({catId, currentDate, initialData}) => {
     // Pobieramy dane globalne bezpośrednio w komponencie
@@ -67,7 +67,7 @@ const DailyHealthLog = ({catId, currentDate, initialData}) => {
         return (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                 <div {...collapsible.triggerProps}>
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                    <h2 className={`${typographyStyles.h2} flex items-center`}>
                         <LucideNotebookText className="mr-2 h-6 w-6 text-indigo-500"/> Dziennik Zdrowia</h2>
                     <div className="flex items-center">
                         <button onClick={(e) => {
@@ -102,7 +102,7 @@ const DailyHealthLog = ({catId, currentDate, initialData}) => {
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+            <h2 className={`${typographyStyles.h2} mb-4 flex items-center`}>
                 <LucideNotebookText className="mr-2 h-6 w-6 text-indigo-500"/> Edytuj Dziennik Zdrowia</h2>
             <div className="space-y-4">
                 <div>
