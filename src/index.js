@@ -10,17 +10,20 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import {AuthProvider} from "./context/AuthContext";
 import {AppProvider} from "./context/AppContext";
 import { BrowserRouter as Router } from 'react-router-dom';
+import ErrorBoundary from "./shared/ErrorBoundary";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <Router>
-            <AuthProvider>
-                <AppProvider>
-                    <App />
-                </AppProvider>
-            </AuthProvider>
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <AuthProvider>
+                    <AppProvider>
+                        <App />
+                    </AppProvider>
+                </AuthProvider>
+            </Router>
+        </ErrorBoundary>
     </React.StrictMode>
 );
 
