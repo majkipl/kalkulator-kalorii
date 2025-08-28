@@ -85,8 +85,8 @@ const ExportModal = ({catId, onCancel}) => {
                 </div>
                 <div className="flex justify-end space-x-3 pt-6">
                     {/* 3. Zastosowanie ujednoliconych stylów */}
-                    <button onClick={onCancel} className={formStyles.buttonSecondary}>Anuluj</button>
-                    <button onClick={handleExport} className={formStyles.buttonPrimary}>Eksportuj</button>
+                    <button onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
+                    <button onClick={handleExport} className={formStyles.buttonSubmit}>Eksportuj</button>
                 </div>
             </div>
         </div>

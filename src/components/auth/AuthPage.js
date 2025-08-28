@@ -95,7 +95,7 @@ const AuthPage = () => {
                         <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                                placeholder="Adres e-mail" className={formStyles.input} required/>
                         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                        <button type="submit" className={formStyles.buttonPrimary}>Wyślij link</button>
+                        <button type="submit" className={formStyles.buttonSubmit}>Wyślij link</button>
                     </form>
                     <button onClick={() => setAuthMode('login')}
                             className="w-full mt-4 text-sm text-indigo-500 hover:underline">Wróć do logowania
@@ -114,7 +114,7 @@ const AuthPage = () => {
                            placeholder="Hasło" className={formStyles.input} required/>
                     {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                     <button type="submit"
-                            className={formStyles.buttonPrimary}>
+                            className={formStyles.buttonSubmit}>
                         {authMode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
                     </button>
                 </form>

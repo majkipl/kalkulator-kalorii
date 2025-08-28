@@ -149,10 +149,10 @@ const AccountSettingsModal = ({onCancel}) => {
                                     <div className="flex justify-end gap-2 pt-2">
                                         {/* 5. Zastosowanie ujednoliconych stylów dla przycisków akcji */}
                                         <button type="button" onClick={() => setShowPasswordFields(false)}
-                                                className={`${formStyles.buttonSecondary} w-auto text-sm px-3 py-1.5`}>Anuluj
+                                                className={`${formStyles.buttonCancel} w-auto text-sm px-3 py-1.5`}>Anuluj
                                         </button>
                                         <button type="submit" disabled={isChangingPassword}
-                                                className={`${formStyles.buttonPrimary} w-auto text-sm px-3 py-1.5`}>
+                                                className={`${formStyles.buttonSubmit} w-auto text-sm px-3 py-1.5`}>
                                             {isChangingPassword ? <Spinner/> : 'Zapisz zmianę'}
                                         </button>
                                     </div>

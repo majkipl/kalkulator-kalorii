@@ -141,9 +141,9 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                     </div>
 
                     <div className="flex justify-end space-x-3 pt-4">
-                        <button type="button" onClick={onCancel} className={formStyles.buttonSecondary}>Anuluj</button>
+                        <button type="button" onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
                         <button type="submit" disabled={isProcessing}
-                                className={formStyles.buttonPrimary}>{initialData ? 'Zapisz zmiany' : 'Dodaj karmę'}</button>
+                                className={formStyles.buttonSubmit}>{initialData ? 'Zapisz zmiany' : 'Dodaj karmę'}</button>
                     </div>
                 </form>
             </div>

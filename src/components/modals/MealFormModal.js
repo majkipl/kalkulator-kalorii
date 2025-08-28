@@ -70,8 +70,8 @@ const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
                     </div>
                     <div className="flex justify-end space-x-3 pt-4">
                         {/* 2. Zastosowanie ujednoliconych stylów dla przycisków */}
-                        <button type="button" onClick={onCancel} className={formStyles.buttonSecondary}>Anuluj</button>
-                        <button type="submit" className={formStyles.buttonPrimary}>Zapisz zmiany</button>
+                        <button type="button" onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
+                        <button type="submit" className={formStyles.buttonSubmit}>Zapisz zmiany</button>
                     </div>
                 </form>
             </div>

@@ -108,12 +108,12 @@ const LabResultsModal = ({catId, onCancel}) => {
                                        onChange={e => setNewResult({...newResult, date: e.target.value})}
                                        className={formStyles.input}/>
                                 <div className="flex justify-end gap-2">
-                                    {/* 4. Zastosowanie ujednoliconych stylów dla przycisków akcji */}
+                                    {/* 4. Zastosowanie semantycznych stylów dla przycisków akcji */}
                                     <button onClick={() => setIsAdding(false)}
-                                            className={`${formStyles.buttonSecondary} w-auto text-sm px-3 py-1.5`}>Anuluj
+                                            className={`${formStyles.buttonCancel} w-auto text-sm px-3 py-1.5`}>Anuluj
                                     </button>
                                     <button onClick={handleAddResult}
-                                            className={`${formStyles.buttonPrimary} w-auto text-sm px-3 py-1.5`}>Zapisz
+                                            className={`${formStyles.buttonSubmit} w-auto text-sm px-3 py-1.5`}>Zapisz
                                     </button>
                                 </div>
                             </div>

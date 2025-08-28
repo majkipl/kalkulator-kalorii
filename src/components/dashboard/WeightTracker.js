@@ -109,7 +109,7 @@ const WeightTracker = ({catId, collapsible}) => {
                                 className={formStyles.input} // 2. Zastosowanie ujednoliconego stylu
                             />
                             {/* 3. Zastosowanie ujednoliconego stylu dla przycisku */}
-                            <button type="submit" className={`${formStyles.buttonPrimary} w-auto text-sm`}>Zapisz
+                            <button type="submit" className={`${formStyles.buttonSubmit} w-auto text-sm`}>Zapisz
                             </button>
                         </form>
                     </div>
