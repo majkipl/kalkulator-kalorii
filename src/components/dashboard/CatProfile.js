@@ -1,3 +1,5 @@
+// /src/components/dashboard/CatProfile.js
+
 import React from 'react';
 import CatProfileForm from '../CatProfileForm';
 import formatAgeText from '../../utils/ageFormatter';

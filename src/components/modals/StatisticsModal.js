@@ -1,3 +1,5 @@
+// /src/components/modals/StatisticsModal.js
+
 import React, {useState, useEffect} from 'react';
 import {collection, doc, getDoc} from 'firebase/firestore';
 import {db} from '../../firebase/config';

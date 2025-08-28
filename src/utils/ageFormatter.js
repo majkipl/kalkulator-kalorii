@@ -1,3 +1,5 @@
+// /src/utils/ageFormatter.js
+
 /**
  * Formatuje wiek kota (w latach) na czytelny tekst.
  * @param {number | null | undefined} age - Wiek kota w formacie dziesiętnym.

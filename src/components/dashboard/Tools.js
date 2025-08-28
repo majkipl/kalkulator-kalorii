@@ -1,3 +1,5 @@
+// /src/components/dashboard/Tools.js
+
 import React from 'react';
 import {
     LucideBone, LucideChevronDown, LucideSettings, LucidePlusCircle, LucideList,

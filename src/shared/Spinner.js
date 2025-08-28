@@ -1,3 +1,5 @@
+// /src/shared/Spinner.js
+
 import React from 'react';
 
 const Spinner = () => (

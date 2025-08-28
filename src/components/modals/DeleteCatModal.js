@@ -1,3 +1,5 @@
+// /src/components/modals/DeleteCatModal.js
+
 import React, {useState} from 'react';
 import {LucideAlertTriangle} from 'lucide-react';
 import Spinner from '../../shared/Spinner';

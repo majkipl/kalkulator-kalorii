@@ -1,3 +1,5 @@
+// /src/firebase/paths.js
+
 // eslint-disable-next-line no-undef
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'cat-nutrition-default';
 

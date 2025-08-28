@@ -1,3 +1,5 @@
+// /src/shared/Toast.js
+
 import React, {useEffect} from 'react';
 import {LucideCheckCircle, LucideAlertCircle, LucideX} from 'lucide-react';
 

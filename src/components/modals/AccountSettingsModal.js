@@ -1,3 +1,5 @@
+// /src/components/modals/AccountSettingsModal.js
+
 import React, {useState} from 'react';
 import {
     EmailAuthProvider,

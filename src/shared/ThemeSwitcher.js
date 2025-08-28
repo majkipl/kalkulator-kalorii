@@ -1,3 +1,5 @@
+// /src/shared/ThemeSwitcher.js
+
 import React from 'react';
 import {LucideSun, LucideMoon, LucideLaptop} from 'lucide-react';
 

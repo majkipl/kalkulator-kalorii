@@ -1,3 +1,5 @@
+// /src/components/dashboard/Dashboard.js
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';

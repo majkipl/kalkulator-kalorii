@@ -1,3 +1,5 @@
+// /src/utils/calculateDer.js
+
 /**
  * Oblicza dzienne zapotrzebowanie energetyczne (DER) dla kota.
  * @param {object} catProfile - Obiekt z danymi profilu kota.

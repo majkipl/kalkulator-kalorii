@@ -1,3 +1,5 @@
+// /src/hooks/useCollapsible.js
+
 import { useState } from 'react';
 
 /**

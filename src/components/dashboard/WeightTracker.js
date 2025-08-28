@@ -1,4 +1,4 @@
-// /components/dashboard/WeightTracker.js
+// /src/components/dashboard/WeightTracker.js
 
 import React, {useState, useEffect} from 'react';
 import {collection, query, onSnapshot, doc, setDoc, updateDoc} from 'firebase/firestore';

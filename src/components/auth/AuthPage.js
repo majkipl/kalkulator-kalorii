@@ -1,3 +1,5 @@
+// /src/components/auth/AuthPage.js
+
 import React, {useState} from 'react';
 import {
     createUserWithEmailAndPassword,
