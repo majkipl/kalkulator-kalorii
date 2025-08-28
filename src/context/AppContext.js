@@ -10,6 +10,9 @@ export const AppProvider = ({children}) => {
     const [toast, setToast] = useState(null);
     const [theme, setTheme] = useTheme();
 
+    // Obliczaj isDark centralnie
+    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
     // Używamy useCallback, aby funkcja showToast była stabilna
     // i nie powodowała niepotrzebnych re-renderów w komponentach, które jej używają.
     const showToast = useCallback((message, type = 'success') => {
@@ -20,6 +23,7 @@ export const AppProvider = ({children}) => {
         showToast,
         theme,
         setTheme,
+        isDark,
     };
 
     return (

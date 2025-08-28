@@ -10,7 +10,7 @@ import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/f
 
 const FoodFormModal = ({onSave, onCancel, initialData}) => {
     // Pobieramy dane globalne z kontekstu
-    const {theme, showToast} = useAppContext();
+    const {theme, showToast, isDark} = useAppContext();
 
     // Stany lokalne
     const [formData, setFormData] = useState({
@@ -24,7 +24,6 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
 
     // Style dla react-select
     const foodTypeOptions = [{value: 'mokra', label: 'Mokra'}, {value: 'sucha', label: 'Sucha'}];
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const customStyles = getCustomSelectStyles(isDark);
 
     // Handlery

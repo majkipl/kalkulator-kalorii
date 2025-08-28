@@ -10,7 +10,7 @@ import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/form
 
 const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
     // Pobieramy 'theme' bezpośrednio z kontekstu
-    const {theme} = useAppContext();
+    const {theme, isDark} = useAppContext();
 
     // Stany lokalne formularza
     const [years, setYears] = useState(cat ? Math.floor(cat.age) : '1');
@@ -60,7 +60,6 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
     }];
 
     // Logika stylów dla react-select na podstawie motywu
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const customSelectStyles = getCustomSelectStyles(isDark);
 
     // Handlery formularza

@@ -9,14 +9,13 @@ import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/f
 
 const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
     // Pobieramy dane globalne bezpośrednio w komponencie
-    const {theme} = useAppContext();
+    const {theme, isDark} = useAppContext();
 
     // Stany lokalne
     const [selectedFoodId, setSelectedFoodId] = useState(initialData?.foodId || '');
     const [weight, setWeight] = useState(initialData?.weight || '');
 
     // Style dla react-select
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     const customStyles = getCustomSelectStyles(isDark);
 
     const foodOptions = useMemo(() =>
@@ -66,12 +65,10 @@ const MealFormModal = ({foods, onSave, onCancel, initialData}) => {
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Ilość (g)</label>
-                        {/* 1. Zastosowanie ujednoliconego stylu */}
                         <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
                                className={formStyles.input} required/>
                     </div>
                     <div className="flex justify-end space-x-3 pt-4">
-                        {/* 2. Zastosowanie ujednoliconych stylów dla przycisków */}
                         <button type="button" onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
                         <button type="submit" className={formStyles.buttonSubmit}>Zapisz zmiany</button>
                     </div>
