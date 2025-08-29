@@ -1,6 +1,9 @@
 // /src/components/modals/AccountSettingsModal.js
 
 import React, {useState} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {changePasswordSchema} from '../../schemas/changePasswordSchema';
 import {
     EmailAuthProvider,
     reauthenticateWithCredential,
@@ -15,20 +18,36 @@ import {LucideX, LucideCheckCircle} from 'lucide-react';
 // Importy hooków i stylów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
-import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles';
+
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({message}) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
 
 const AccountSettingsModal = ({onCancel}) => {
     // Pobieramy dane globalne
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
-    // Stany lokalne
+    // Stany lokalne (dla logiki niezwiązanej z formularzem hasła)
     const [isLinking, setIsLinking] = useState(false);
     const [showPasswordFields, setShowPasswordFields] = useState(false);
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    // Inicjalizacja react-hook-form dla formularza zmiany hasła
+    const {register, handleSubmit, formState: {errors}, reset} = useForm({
+        resolver: zodResolver(changePasswordSchema),
+        defaultValues: {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+        }
+    });
 
     const isGoogleLinked = user.providerData.some(provider => provider.providerId === 'google.com');
     const isEmailProvider = user.providerData.some(provider => provider.providerId === 'password');
@@ -50,27 +69,17 @@ const AccountSettingsModal = ({onCancel}) => {
         }
     };
 
-    const handleChangePassword = async (e) => {
-        e.preventDefault();
-        if (newPassword !== confirmPassword) {
-            showToast("Nowe hasła nie są zgodne.", "error");
-            return;
-        }
-        if (!currentPassword || !newPassword) {
-            showToast("Wszystkie pola hasła są wymagane.", "error");
-            return;
-        }
-
+    // Ta funkcja jest wywoływana tylko po pomyślnej walidacji po stronie klienta
+    const processPasswordChange = async (data) => {
         setIsChangingPassword(true);
-        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
 
         try {
             await reauthenticateWithCredential(user, credential);
-            await updatePassword(user, newPassword);
+            await updatePassword(user, data.newPassword);
+
             showToast("Hasło zostało pomyślnie zmienione.", "success");
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
+            reset(); // Czyści formularz
             setShowPasswordFields(false);
         } catch (error) {
             let message = "Wystąpił błąd podczas zmiany hasła.";
@@ -94,10 +103,10 @@ const AccountSettingsModal = ({onCancel}) => {
                             className="p-1 text-gray-400 hover:text-gray-600 rounded-full"><LucideX/></button>
                 </div>
                 <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                    <p><strong>E-mail:</strong> {user.email}</p>
+                    <p><strong className={typographyStyles.label}>E-mail:</strong> {user.email}</p>
 
                     <div>
-                        <h3 className="text-sm font-medium mb-2">Połączone konta</h3>
+                        <h3 className={`${typographyStyles.h3} text-sm font-medium mb-2`}>Połączone konta</h3>
                         {isGoogleLinked ? (
                             <div
                                 className="flex items-center p-3 rounded-lg bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
@@ -105,7 +114,6 @@ const AccountSettingsModal = ({onCancel}) => {
                                 Konto połączone z Google.
                             </div>
                         ) : (
-                            // 2. Zastosowanie ujednoliconego stylu
                             <button onClick={handleLinkGoogle} disabled={isLinking} className={formStyles.buttonGoogle}>
                                 {isLinking ? <Spinner/> : (<>
                                     <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48">
@@ -126,32 +134,35 @@ const AccountSettingsModal = ({onCancel}) => {
 
                     {isEmailProvider && (
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                            <h3 className="text-sm font-medium mb-2">Zmień hasło</h3>
+                            <h3 className={`${typographyStyles.h3} text-sm font-medium mb-2`}>Zmień hasło</h3>
                             {!showPasswordFields ? (
-                                // 3. Zastosowanie ujednoliconego stylu
                                 <button onClick={() => setShowPasswordFields(true)}
                                         className={formStyles.buttonTertiary}>
                                     Zmień hasło
                                 </button>
                             ) : (
-                                <form onSubmit={handleChangePassword}
+                                <form onSubmit={handleSubmit(processPasswordChange)}
                                       className="space-y-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                    {/* 4. Zastosowanie ujednoliconych stylów dla inputów */}
-                                    <div><input type="password" value={currentPassword}
-                                                onChange={e => setCurrentPassword(e.target.value)}
-                                                placeholder="Aktualne hasło" className={formStyles.input} required/>
+                                    <div>
+                                        <input type="password" placeholder="Aktualne hasło"
+                                               className={formStyles.input} {...register("currentPassword")} />
+                                        <FormError message={errors.currentPassword?.message}/>
                                     </div>
-                                    <div><input type="password" value={newPassword}
-                                                onChange={e => setNewPassword(e.target.value)} placeholder="Nowe hasło"
-                                                className={formStyles.input} required/></div>
-                                    <div><input type="password" value={confirmPassword}
-                                                onChange={e => setConfirmPassword(e.target.value)}
-                                                placeholder="Potwierdź nowe hasło" className={formStyles.input}
-                                                required/></div>
+                                    <div>
+                                        <input type="password" placeholder="Nowe hasło"
+                                               className={formStyles.input} {...register("newPassword")} />
+                                        <FormError message={errors.newPassword?.message}/>
+                                    </div>
+                                    <div>
+                                        <input type="password" placeholder="Potwierdź nowe hasło"
+                                               className={formStyles.input} {...register("confirmPassword")} />
+                                        <FormError message={errors.confirmPassword?.message}/>
+                                    </div>
                                     <div className="flex justify-end gap-2 pt-2">
-                                        {/* 5. Zastosowanie ujednoliconych stylów dla przycisków akcji */}
-                                        <button type="button" onClick={() => setShowPasswordFields(false)}
-                                                className={`${formStyles.buttonCancel} w-auto text-sm px-3 py-1.5`}>Anuluj
+                                        <button type="button" onClick={() => {
+                                            setShowPasswordFields(false);
+                                            reset();
+                                        }} className={`${formStyles.buttonCancel} w-auto text-sm px-3 py-1.5`}>Anuluj
                                         </button>
                                         <button type="submit" disabled={isChangingPassword}
                                                 className={`${formStyles.buttonSubmit} w-auto text-sm px-3 py-1.5`}>
@@ -164,7 +175,7 @@ const AccountSettingsModal = ({onCancel}) => {
                     )}
                 </div>
                 <div className="flex justify-end pt-6">
-                    <button onClick={onCancel} className={formStyles.buttonSecondary}>Zamknij</button>
+                    <button onClick={onCancel} className={formStyles.buttonCancel}>Zamknij</button>
                 </div>
             </div>
         </div>

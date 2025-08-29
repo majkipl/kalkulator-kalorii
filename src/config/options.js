@@ -34,3 +34,8 @@ export const chronicDiseaseOptions = [
     {value: 'zapalenie_trzustki', label: 'Zapalenie trzustki'},
     {value: 'nieswoiste_zapalenie_jelit', label: 'Nieswoiste zapalenie jelit (IBD)'}
 ];
+
+export const foodTypeOptions = [
+    {value: 'mokra', label: 'Mokra'},
+    {value: 'sucha', label: 'Sucha'}
+];

@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# Kalkulator Kalorii
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
-## Available Scripts
+Nowoczesna aplikacja internetowa do obliczania dziennego zapotrzebowania kalorycznego, zbudowana przy użyciu React i stylizowana za pomocą Tailwind CSS.
 
-In the project directory, you can run:
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Demo na Żywo
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**[może później]**
 
-### `npm test`
+## Funkcje
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Obliczanie BMR:** Wylicza podstawową przemianę materii na podstawie wzoru Mifflina-St Jeora.
+- **Obliczanie TDEE:** Wylicza całkowite dzienne zapotrzebowanie na kalorie, uwzględniając poziom aktywności fizycznej.
+- **Responsywny Design:** Interfejs dopasowuje się do urządzeń mobilnych i desktopowych.
+- **Interaktywny Interfejs:** Natychmiastowe wyniki bez przeładowywania strony.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🛠️ Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Framework:** [React](https://reactjs.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Instalacja i Uruchomienie
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Aby uruchomić projekt lokalnie, postępuj zgodnie z poniższymi krokami.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1.  **Sklonuj repozytorium:**
+    ```bash
+    git clone [https://github.com/majkipl/kalkulator-kalorii.git](https://github.com/majkipl/kalkulator-kalorii.git)
+    ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2.  **Przejdź do katalogu projektu:**
+    ```bash
+    cd kalkulator-kalorii
+    ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3.  **Zainstaluj zależności:**
+    ```bash
+    npm install
+    ```
 
-## Learn More
+4.  **Uruchom serwer deweloperski:**
+    ```bash
+    npm run dev
+    ```
+    Aplikacja będzie dostępna pod adresem `http://localhost:5173` (lub innym, wskazanym w konsoli).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Dostępne Skrypty
 
-### Code Splitting
+- `npm run dev`: Uruchamia aplikację w trybie deweloperskim.
+- `npm run build`: Buduje aplikację do folderu `dist` w celu wdrożenia na produkcję.
+- `npm run preview`: Uruchamia lokalny serwer do podglądu produkcyjnej wersji aplikacji.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## Wdrożenie (Deployment)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Aplikację można łatwo wdrożyć na platformach takich jak:
 
-### Making a Progressive Web App
+- [Vercel](https://vercel.com/)
+- [Netlify](https://www.netlify.com/)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Platformy te zazwyczaj automatycznie wykrywają, że jest to projekt Vite/React i konfigurują proces budowania i wdrożenia.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Licencja
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Projekt udostępniany na licencji MIT. Zobacz plik `LICENSE`, aby uzyskać więcej informacji.

@@ -1,32 +1,53 @@
 // /src/components/modals/FoodFormModal.js
 
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
+import {useForm, Controller} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {foodSchema} from '../../schemas/foodSchema';
 import Select from 'react-select';
 import {LucideX, LucideCat} from 'lucide-react';
 
-// Importy hooków i stylów
+// Importy z projektu
 import {useAppContext} from '../../context/AppContext';
 import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/formStyles';
+import {foodTypeOptions} from '../../config/options';
+
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({message}) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
+
 
 const FoodFormModal = ({onSave, onCancel, initialData}) => {
-    // Pobieramy dane globalne z kontekstu
-    const {theme, showToast, isDark} = useAppContext();
-
-    // Stany lokalne
-    const [formData, setFormData] = useState({
-        name: initialData?.name || '',
-        type: initialData?.type || 'mokra',
-        calories: initialData?.calories || '',
-        photoURL: initialData?.photoURL || ''
-    });
+    const {isDark, showToast} = useAppContext();
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef(null);
 
-    // Style dla react-select
-    const foodTypeOptions = [{value: 'mokra', label: 'Mokra'}, {value: 'sucha', label: 'Sucha'}];
-    const customStyles = getCustomSelectStyles(isDark);
+    const {register, handleSubmit, control, formState: {errors}, reset, setValue, watch} = useForm({
+        resolver: zodResolver(foodSchema),
+        defaultValues: {
+            name: initialData?.name || '',
+            calories: initialData?.calories || '',
+            type: initialData?.type || 'mokra',
+            photoURL: initialData?.photoURL || ''
+        }
+    });
 
-    // Handlery
+    // Obserwujemy wartość photoURL, aby dynamicznie aktualizować podgląd
+    const photoURL = watch('photoURL');
+
+    useEffect(() => {
+        if (initialData) {
+            reset(initialData);
+        }
+    }, [initialData, reset]);
+
+    const customSelectStyles = getCustomSelectStyles(isDark);
+
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -66,7 +87,8 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                 ctx.drawImage(img, 0, 0, width, height);
 
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                setFormData(prev => ({...prev, photoURL: dataUrl}));
+                // Ustawiamy wartość w react-hook-form
+                setValue('photoURL', dataUrl, {shouldValidate: true});
                 setIsProcessing(false);
             };
             img.onerror = () => {
@@ -80,22 +102,15 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
         };
     };
 
-    const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData(prev => ({...prev, [name]: value}));
-    };
-    const handleSelectChange = (selectedOption) => {
-        setFormData(prev => ({...prev, type: selectedOption.value}));
-    };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({...formData, calories: parseInt(formData.calories) || 0});
+    // Funkcja `onSave` jest wywoływana tylko po pomyślnej walidacji
+    const processSubmit = (data) => {
+        onSave({...data, calories: parseInt(data.calories, 10) || 0});
     };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-md animate-fade-in-up">
-                <form onSubmit={handleSubmit} className="space-y-4 text-gray-700 dark:text-gray-300">
+                <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
                     <div className="flex justify-between items-center">
                         <h2 className={typographyStyles.h2}>{initialData ? 'Edytuj karmę' : 'Dodaj nową karmę'}</h2>
                         <button type="button" onClick={onCancel}
@@ -107,8 +122,8 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                         <div className="mt-1 flex items-center gap-4">
                             <div
                                 className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                {formData.photoURL ? (
-                                    <img src={formData.photoURL} alt="Podgląd"
+                                {photoURL ? (
+                                    <img src={photoURL} alt="Podgląd"
                                          className="w-full h-full object-cover rounded-lg"/>
                                 ) : (
                                     <LucideCat className="w-8 h-8 text-gray-400"/>
@@ -116,7 +131,6 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                             </div>
                             <input type="file" accept="image/*" onChange={handleImageChange} ref={fileInputRef}
                                    className="hidden"/>
-                            {/* Zastosowanie ujednoliconego stylu dla przycisku */}
                             <button type="button" onClick={() => fileInputRef.current.click()}
                                     className={`${formStyles.buttonSecondary} w-auto text-sm`}>
                                 {isProcessing ? 'Przetwarzam...' : 'Wybierz zdjęcie'}
@@ -126,19 +140,31 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
 
                     <div>
                         <label className={typographyStyles.label}>Nazwa karmy</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange}
-                               className={formStyles.input} required/>
+                        <input type="text" {...register("name")} className={formStyles.input}/>
+                        <FormError message={errors.name?.message}/>
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Kaloryczność (kcal / 100g)</label>
-                        <input type="number" name="calories" value={formData.calories} onChange={handleChange}
-                               className={formStyles.input} required/>
+                        <input type="number" {...register("calories")} className={formStyles.input}/>
+                        <FormError message={errors.calories?.message}/>
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Typ karmy</label>
-                        <Select name="type" options={foodTypeOptions}
-                                value={foodTypeOptions.find(o => o.value === formData.type)}
-                                onChange={handleSelectChange} styles={customStyles} className="mt-1"/>
+                        <Controller
+                            name="type"
+                            control={control}
+                            render={({field}) => (
+                                <Select
+                                    {...field}
+                                    options={foodTypeOptions}
+                                    value={foodTypeOptions.find(o => o.value === field.value)}
+                                    onChange={val => field.onChange(val.value)}
+                                    styles={customSelectStyles}
+                                    className="mt-1"
+                                />
+                            )}
+                        />
+                        <FormError message={errors.type?.message}/>
                     </div>
 
                     <div className="flex justify-end space-x-3 pt-4">

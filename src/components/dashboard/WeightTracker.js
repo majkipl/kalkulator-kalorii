@@ -1,6 +1,9 @@
 // /src/components/dashboard/WeightTracker.js
 
 import React, {useState, useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {weightSchema} from '../../schemas/weightSchema';
 import {collection, query, onSnapshot, doc, setDoc, updateDoc} from 'firebase/firestore';
 import {db} from '../../firebase/config';
 import {userCatsCollectionPath} from '../../firebase/paths';
@@ -10,9 +13,18 @@ import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 
 // Importy do stylów i wizualizacji
-import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {LucideLineChart, LucideChevronDown} from 'lucide-react';
+
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({message}) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
 
 const WeightTracker = ({catId, collapsible}) => {
     // Pobieramy dane globalne bezpośrednio w komponencie
@@ -21,7 +33,10 @@ const WeightTracker = ({catId, collapsible}) => {
 
     // Stany lokalne
     const [weightLog, setWeightLog] = useState([]);
-    const [newWeight, setNewWeight] = useState('');
+
+    const {register, handleSubmit, formState: {errors}, reset} = useForm({
+        resolver: zodResolver(weightSchema),
+    });
 
     const catsPath = userCatsCollectionPath(user.uid);
 
@@ -40,24 +55,19 @@ const WeightTracker = ({catId, collapsible}) => {
         return () => unsubscribe();
     }, [catId, catsPath]);
 
-    const handleAddWeight = async (e) => {
-        e.preventDefault();
-        if (!newWeight || parseFloat(newWeight) <= 0) {
-            showToast("Proszę podać prawidłową wagę.", "error");
-            return;
-        }
-
+    const handleAddWeight = async (data) => {
+        const newWeight = parseFloat(data.newWeight);
         try {
             await setDoc(doc(collection(db, catsPath, catId, 'weightLog')), {
-                weight: parseFloat(newWeight),
+                weight: newWeight,
                 date: new Date()
             });
 
             await updateDoc(doc(db, catsPath, catId), {
-                currentWeight: parseFloat(newWeight)
+                currentWeight: newWeight
             });
             showToast("Waga została zaktualizowana.");
-            setNewWeight('');
+            reset({newWeight: ''}); // Czyści formularz po zapisie
         } catch (error) {
             showToast("Błąd zapisu wagi.", "error");
         }
@@ -71,7 +81,7 @@ const WeightTracker = ({catId, collapsible}) => {
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className={`${typographyStyles.h2} flex items-center`}>
+                <h2 className={typographyStyles.h2}>
                     <LucideLineChart className="mr-2 h-6 w-6 text-indigo-500"/> Historia wagi
                 </h2>
                 <LucideChevronDown
@@ -99,17 +109,20 @@ const WeightTracker = ({catId, collapsible}) => {
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
-                        <form onSubmit={handleAddWeight} className="mt-4 flex items-center gap-2">
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={newWeight}
-                                onChange={(e) => setNewWeight(e.target.value)}
-                                placeholder="Nowa waga (kg)"
-                                className={formStyles.input} // 2. Zastosowanie ujednoliconego stylu
-                            />
-                            {/* 3. Zastosowanie ujednoliconego stylu dla przycisku */}
-                            <button type="submit" className={`${formStyles.buttonSubmit} w-auto text-sm`}>Zapisz
+                        <form onSubmit={handleSubmit(handleAddWeight)}
+                              className="mt-4 flex flex-col items-stretch gap-2 sm:flex-row">
+                            <div className="flex-grow">
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Nowa waga (kg)"
+                                    className={formStyles.input}
+                                    {...register("newWeight")}
+                                />
+                                <FormError message={errors.newWeight?.message}/>
+                            </div>
+                            <button type="submit"
+                                    className={`${formStyles.buttonSubmit} w-full sm:w-auto text-sm`}>Zapisz
                             </button>
                         </form>
                     </div>

@@ -1,139 +1,212 @@
 // /src/components/CatProfileForm.js
 
-import React, {useState} from 'react';
+import React, { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { catProfileSchema } from '../schemas/catProfileSchema';
 import Select from 'react-select';
-import {LucideSave, LucideTrash2} from 'lucide-react';
+import { LucideSave, LucideTrash2 } from 'lucide-react';
 
-// Importy hooków i ujednoliconych stylów
-import {useAppContext} from '../context/AppContext';
-import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/formStyles';
-
+// Importy z projektu
+import { useAppContext } from '../context/AppContext';
+import { formStyles, getCustomSelectStyles, typographyStyles } from '../utils/formStyles';
 import { breedOptions, activityLevelOptions, physiologicalStateOptions, chronicDiseaseOptions } from '../config/options';
 
-const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
-    // Pobieramy 'theme' bezpośrednio z kontekstu
-    const {theme, isDark} = useAppContext();
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({ message }) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
 
-    // Stany lokalne formularza
-    const [years, setYears] = useState(cat ? Math.floor(cat.age) : '1');
-    const [months, setMonths] = useState(cat ? Math.round((cat.age - Math.floor(cat.age)) * 12) : '0');
-    const [formData, setFormData] = useState({
-        name: cat?.name || '',
-        currentWeight: cat?.currentWeight || '',
-        targetWeight: cat?.targetWeight || '',
-        isNeutered: cat?.isNeutered || false,
-        activityLevel: cat?.activityLevel || 'umiarkowany',
-        physiologicalState: cat?.physiologicalState || 'normalny',
-        chronicDisease: cat?.chronicDisease || 'brak',
-        breed: cat?.breed || 'mieszany'
+const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
+    const { isDark } = useAppContext();
+
+    /**
+     * Inicjalizacja react-hook-form.
+     * - `resolver` łączy formularz z naszym schematem walidacji Zod.
+     * - `defaultValues` ustawia początkowe wartości formularza.
+     */
+    const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
+        resolver: zodResolver(catProfileSchema),
+        defaultValues: {
+            name: cat?.name || '',
+            currentWeight: cat?.currentWeight || '',
+            targetWeight: cat?.targetWeight || '',
+            isNeutered: cat?.isNeutered || false,
+            breed: cat?.breed || 'mieszany',
+            activityLevel: cat?.activityLevel || 'umiarkowany',
+            physiologicalState: cat?.physiologicalState || 'normalny',
+            chronicDisease: cat?.chronicDisease || 'brak',
+            years: cat ? Math.floor(cat.age) : 1,
+            months: cat ? Math.round((cat.age - Math.floor(cat.age)) * 12) : 0,
+        }
     });
 
-    // Opcje dla pól typu Select
+    /**
+     * Efekt, który resetuje wartości formularza, gdy zmienia się obiekt `cat`.
+     * Przydatne, gdyby ten sam komponent był używany do przełączania się między edycją różnych profili.
+     */
+    useEffect(() => {
+        if (cat) {
+            reset({
+                name: cat.name,
+                currentWeight: cat.currentWeight,
+                targetWeight: cat.targetWeight,
+                isNeutered: cat.isNeutered,
+                breed: cat.breed,
+                activityLevel: cat.activityLevel,
+                physiologicalState: cat.physiologicalState,
+                chronicDisease: cat.chronicDisease,
+                years: Math.floor(cat.age),
+                months: Math.round((cat.age - Math.floor(cat.age)) * 12),
+            });
+        }
+    }, [cat, reset]);
 
-
-
-
-
-    // Logika stylów dla react-select na podstawie motywu
     const customSelectStyles = getCustomSelectStyles(isDark);
 
-    // Handlery formularza
-    const handleChange = (e) => {
-        const {name, value, type, checked} = e.target;
-        setFormData(prev => ({...prev, [name]: type === 'checkbox' ? checked : value}));
-    };
+    /**
+     * Ta funkcja jest wywoływana przez `handleSubmit` tylko wtedy,
+     * gdy dane przejdą walidację zdefiniowaną w schemacie Zod.
+     * @param {object} data - Poprawne, zwalidowane dane z formularza.
+     */
+    const processSubmit = (data) => {
+        const finalAge = parseInt(data.years, 10) + (parseInt(data.months, 10) / 12);
 
-    const handleSelectChange = (name) => (selectedOption) => {
-        setFormData(prev => ({...prev, [name]: selectedOption.value}));
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const finalAge = parseInt(years, 10) + (parseInt(months, 10) / 12);
         const dataToSave = {
-            ...formData,
+            name: data.name,
+            currentWeight: parseFloat(data.currentWeight) || 0,
+            targetWeight: parseFloat(data.targetWeight) || 0,
+            isNeutered: data.isNeutered,
+            activityLevel: data.activityLevel,
+            physiologicalState: data.physiologicalState,
+            chronicDisease: data.chronicDisease,
+            breed: data.breed,
             age: finalAge,
-            currentWeight: parseFloat(formData.currentWeight) || 0,
-            targetWeight: parseFloat(formData.targetWeight) || 0,
         };
         onSave(dataToSave);
     };
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-fade-in">
-            <form onSubmit={handleSubmit} className="space-y-4 text-gray-700 dark:text-gray-300">
+            <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
                 <h2 className={`${typographyStyles.h2} mb-4`}>{cat ? 'Edytuj profil' : 'Stwórz nowy profil'}</h2>
 
                 <div>
                     <label className={typographyStyles.label}>Nazwa kota</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange}
-                           className={formStyles.input} required/>
+                    <input type="text" {...register("name")} className={formStyles.input} />
+                    <FormError message={errors.name?.message} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={typographyStyles.label}>Aktualna waga (kg)</label>
-                        <input type="number" step="0.1" name="currentWeight" value={formData.currentWeight}
-                               onChange={handleChange} className={formStyles.input} required/>
+                        <input type="number" step="0.01" {...register("currentWeight")} className={formStyles.input} />
+                        <FormError message={errors.currentWeight?.message} />
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Docelowa waga (kg)</label>
-                        <input type="number" step="0.1" name="targetWeight" value={formData.targetWeight}
-                               onChange={handleChange} className={formStyles.input} placeholder="Opcjonalnie"/>
+                        <input type="number" step="0.01" {...register("targetWeight")} className={formStyles.input} placeholder="Opcjonalnie" />
+                        <FormError message={errors.targetWeight?.message} />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={typographyStyles.label}>Wiek (lata)</label>
-                        <input type="number" value={years} onChange={(e) => setYears(e.target.value)}
-                               className={formStyles.input} min="0" required/>
+                        <input type="number" {...register("years")} className={formStyles.input} />
+                        <FormError message={errors.years?.message} />
                     </div>
-                    {parseInt(years, 10) === 0 && (
-                        <div>
-                            <label className={typographyStyles.label}>Miesiące</label>
-                            <input type="number" value={months} onChange={(e) => setMonths(e.target.value)}
-                                   className={formStyles.input} min="0" max="11" required/>
-                        </div>
-                    )}
+                    <div>
+                        <label className={typographyStyles.label}>Miesiące</label>
+                        <input type="number" {...register("months")} className={formStyles.input} />
+                        <FormError message={errors.months?.message} />
+                    </div>
                 </div>
 
+                {/* Wzorzec <Controller> jest używany do integracji z zewnętrznymi bibliotekami UI jak react-select */}
                 <div>
                     <label className={typographyStyles.label}>Rasa</label>
-                    <Select name="breed" options={breedOptions}
-                            value={breedOptions.find(o => o.value === formData.breed)}
-                            onChange={handleSelectChange('breed')} styles={customSelectStyles} className="mt-1"
-                            placeholder="Wybierz rasę..." required/>
+                    <Controller
+                        name="breed"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={breedOptions}
+                                value={breedOptions.find(o => o.value === field.value)}
+                                onChange={val => field.onChange(val.value)}
+                                styles={customSelectStyles}
+                                className="mt-1"
+                            />
+                        )}
+                    />
+                    <FormError message={errors.breed?.message} />
                 </div>
 
                 <div>
                     <label className={typographyStyles.label}>Poziom aktywności</label>
-                    <Select name="activityLevel" options={activityLevelOptions}
-                            value={activityLevelOptions.find(o => o.value === formData.activityLevel)}
-                            onChange={handleSelectChange('activityLevel')} styles={customSelectStyles} className="mt-1"
-                            required/>
+                    <Controller
+                        name="activityLevel"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={activityLevelOptions}
+                                value={activityLevelOptions.find(o => o.value === field.value)}
+                                onChange={val => field.onChange(val.value)}
+                                styles={customSelectStyles}
+                                className="mt-1"
+                            />
+                        )}
+                    />
+                    <FormError message={errors.activityLevel?.message} />
                 </div>
 
                 <div>
                     <label className={typographyStyles.label}>Stan fizjologiczny</label>
-                    <Select name="physiologicalState" options={physiologicalStateOptions}
-                            value={physiologicalStateOptions.find(o => o.value === formData.physiologicalState)}
-                            onChange={handleSelectChange('physiologicalState')} styles={customSelectStyles}
-                            className="mt-1" required/>
+                    <Controller
+                        name="physiologicalState"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={physiologicalStateOptions}
+                                value={physiologicalStateOptions.find(o => o.value === field.value)}
+                                onChange={val => field.onChange(val.value)}
+                                styles={customSelectStyles}
+                                className="mt-1"
+                            />
+                        )}
+                    />
+                    <FormError message={errors.physiologicalState?.message} />
                 </div>
 
                 <div>
                     <label className={typographyStyles.label}>Choroba przewlekła</label>
-                    <Select name="chronicDisease" options={chronicDiseaseOptions}
-                            value={chronicDiseaseOptions.find(o => o.value === formData.chronicDisease)}
-                            onChange={handleSelectChange('chronicDisease')} styles={customSelectStyles} className="mt-1"
-                            required/>
+                    <Controller
+                        name="chronicDisease"
+                        control={control}
+                        render={({ field }) => (
+                            <Select
+                                {...field}
+                                options={chronicDiseaseOptions}
+                                value={chronicDiseaseOptions.find(o => o.value === field.value)}
+                                onChange={val => field.onChange(val.value)}
+                                styles={customSelectStyles}
+                                className="mt-1"
+                            />
+                        )}
+                    />
+                    <FormError message={errors.chronicDisease?.message} />
                 </div>
 
                 <div className="flex items-center">
-                    <input type="checkbox" id="isNeutered" name="isNeutered" checked={formData.isNeutered}
-                           onChange={handleChange} className={typographyStyles.checkbox}/>
-                    <label htmlFor="isNeutered" className={`${typographyStyles.label} ml-2`}>Kot sterylizowany/kastrowany</label>
+                    <input type="checkbox" id="isNeutered" {...register("isNeutered")} className={formStyles.checkbox} />
+                    <label htmlFor="isNeutered" className={`${typographyStyles.label} ml-2 font-normal`}>Kot sterylizowany/kastrowany</label>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">

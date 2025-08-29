@@ -1,53 +1,72 @@
 // /src/components/AddMealForm.js
 
-import React, {useState, useMemo} from 'react';
+import React, {useMemo} from 'react';
+import {useForm, Controller} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {mealSchema} from '../schemas/mealSchema';
 import Select from 'react-select';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale-subtle.css';
+
+// Importy z projektu
+import {useAppContext} from '../context/AppContext';
 import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/formStyles';
 import {LucidePlusCircle, LucideBone} from 'lucide-react';
-import {useAppContext} from '../context/AppContext';
+
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({message}) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
 
 const AddMealForm = ({foods, onSave}) => {
-    const {theme, isDark} = useAppContext();
-    const [selectedFoodId, setSelectedFoodId] = useState('');
-    const [weight, setWeight] = useState('');
+    const {isDark} = useAppContext();
 
-    const customStyles = getCustomSelectStyles(isDark);
+    const {register, handleSubmit, control, formState: {errors}, reset} = useForm({
+        resolver: zodResolver(mealSchema),
+        defaultValues: {
+            food: null,
+            weight: '',
+        }
+    });
+
+    const customSelectStyles = getCustomSelectStyles(isDark);
 
     const foodOptions = useMemo(() =>
             foods.map(food => ({
                 value: food.id,
                 label: food.name,
+                // Dodatkowe dane, które możemy wykorzystać
                 calories: food.calories,
                 photoURL: food.photoURL || null,
             })),
         [foods]
     );
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!selectedFoodId || !weight) return;
-        const food = foods.find(f => f.id === selectedFoodId);
-        if (!food) return;
-        const calories = (parseFloat(weight) / 100) * food.calories;
+    const processSubmit = (data) => {
+        const selectedFood = foods.find(f => f.id === data.food.value);
+        if (!selectedFood) return;
+
+        const weight = parseFloat(data.weight);
+        const calories = (weight / 100) * selectedFood.calories;
+
         const mealData = {
-            foodId: food.id,
-            foodName: food.name,
-            foodType: food.type,
-            weight: parseFloat(weight),
-            calories: calories
+            foodId: selectedFood.id,
+            foodName: selectedFood.name,
+            foodType: selectedFood.type,
+            weight: weight,
+            calories: calories,
         };
+
         onSave(mealData);
-        setSelectedFoodId('');
-        setWeight('');
+        reset(); // Czyści formularz po poprawnym dodaniu
     };
 
-    const handleSelectChange = (selectedOption) => {
-        setSelectedFoodId(selectedOption ? selectedOption.value : '');
-    };
-
+    // Komponenty niestandardowe dla react-select (bez zmian)
     const CustomOption = ({innerProps, label, data}) => {
         const content = (
             <div
@@ -90,23 +109,40 @@ const AddMealForm = ({foods, onSave}) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start text-gray-700 dark:text-gray-300">
+        <form onSubmit={handleSubmit(processSubmit)}
+              className="space-y-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                 <div className="md:col-span-2">
-                    <label className={`${typographyStyles.label} mb-1`}>Wybierz karmę</label>
-                    <Select styles={customStyles} options={foodOptions}
-                            value={foodOptions.find(o => o.value === selectedFoodId)} onChange={handleSelectChange}
-                            placeholder="Wyszukaj lub wybierz karmę..." isClearable required
-                            components={{Option: CustomOption, SingleValue: CustomSingleValue}}/>
+                    <label className={typographyStyles.label}>Wybierz karmę</label>
+                    <Controller
+                        name="food"
+                        control={control}
+                        render={({field}) => (
+                            <Select
+                                {...field}
+                                options={foodOptions}
+                                styles={customSelectStyles}
+                                placeholder="Wyszukaj lub wybierz karmę..."
+                                isClearable
+                                components={{Option: CustomOption, SingleValue: CustomSingleValue}}
+                            />
+                        )}
+                    />
+                    <FormError message={errors.food?.message || errors.food?.value?.message}/>
                 </div>
                 <div>
-                    <label className={`${typographyStyles.label} mb-1`}>Ilość (g)</label>
-                    <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)}
-                           className={formStyles.input} placeholder="np. 50" required/>
+                    <label className={typographyStyles.label}>Ilość (g)</label>
+                    <input
+                        type="number"
+                        step="1"
+                        placeholder="np. 50"
+                        {...register("weight")}
+                        className={formStyles.input}
+                    />
+                    <FormError message={errors.weight?.message}/>
                 </div>
             </div>
-            <button type="submit"
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center h-10">
+            <button type="submit" className={formStyles.buttonSuccess}>
                 <LucidePlusCircle className="mr-2 h-5 w-5"/> Dodaj posiłek
             </button>
         </form>
