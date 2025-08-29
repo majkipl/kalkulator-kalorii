@@ -1,6 +1,9 @@
 // /src/components/modals/LabResultsModal.js
 
 import React, {useState, useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {labResultSchema} from '../../schemas/labResultSchema';
 import {collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc} from 'firebase/firestore';
 import {db} from '../../firebase/config';
 import {userCatsCollectionPath} from '../../firebase/paths';
@@ -9,11 +12,20 @@ import {userCatsCollectionPath} from '../../firebase/paths';
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 import Spinner from '../../shared/Spinner';
-import {formStyles, typographyStyles} from '../../utils/formStyles'; // 1. Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 import {LucideX, LucidePlusCircle, LucideTrash2} from 'lucide-react';
 
+/**
+ * Mały komponent pomocniczy do wyświetlania błędów walidacji.
+ * @param {{message: string}} props
+ */
+const FormError = ({message}) => {
+    if (!message) return null;
+    return <p className="text-sm text-red-500 mt-1">{message}</p>;
+};
+
 const LabResultsModal = ({catId, onCancel}) => {
-    // Pobieramy dane globalne bezpośrednio w komponencie
+    // Pobieramy dane globalne
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
@@ -21,15 +33,20 @@ const LabResultsModal = ({catId, onCancel}) => {
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
-    const [newResult, setNewResult] = useState({
-        testName: '',
-        result: '',
-        unit: '',
-        referenceRange: '',
-        date: new Date().toISOString().split('T')[0]
-    });
 
     const catsPath = userCatsCollectionPath(user.uid);
+
+    // Inicjalizacja react-hook-form
+    const {register, handleSubmit, formState: {errors}, reset} = useForm({
+        resolver: zodResolver(labResultSchema),
+        defaultValues: {
+            testName: '',
+            result: '',
+            unit: '',
+            referenceRange: '',
+            date: new Date().toISOString().split('T')[0],
+        }
+    });
 
     useEffect(() => {
         const resultsCol = collection(db, catsPath, catId, 'labResults');
@@ -41,21 +58,12 @@ const LabResultsModal = ({catId, onCancel}) => {
         return () => unsubscribe();
     }, [catId, catsPath]);
 
-    const handleAddResult = async () => {
-        if (!newResult.testName || !newResult.result) {
-            showToast("Nazwa badania i wynik są wymagane.", "error");
-            return;
-        }
+    const handleAddResult = async (data) => {
         try {
             const resultsCol = collection(db, catsPath, catId, 'labResults');
-            await addDoc(resultsCol, {...newResult, date: new Date(newResult.date)});
-            setNewResult({
-                testName: '',
-                result: '',
-                unit: '',
-                referenceRange: '',
-                date: new Date().toISOString().split('T')[0]
-            });
+            await addDoc(resultsCol, {...data, date: new Date(data.date)});
+
+            reset(); // Czyści formularz
             setIsAdding(false);
             showToast("Wynik badania został dodany.");
         } catch (error) {
@@ -84,41 +92,48 @@ const LabResultsModal = ({catId, onCancel}) => {
                 </div>
                 {loading ? <Spinner/> : (
                     <div className="flex-grow overflow-y-auto pr-2">
-                        {/* 2. Zastosowanie ujednoliconego stylu */}
                         <button onClick={() => setIsAdding(!isAdding)} className={`${formStyles.buttonTertiary} mb-4`}>
                             <LucidePlusCircle
                                 className="mr-2 h-5 w-5"/> {isAdding ? 'Anuluj dodawanie' : 'Dodaj nowy wynik'}
                         </button>
                         {isAdding && (
-                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 space-y-3">
-                                {/* 3. Zastosowanie ujednoliconych stylów dla inputów */}
-                                <input value={newResult.testName}
-                                       onChange={e => setNewResult({...newResult, testName: e.target.value})}
-                                       placeholder="Nazwa badania (np. Kreatynina)" className={formStyles.input}/>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <input value={newResult.result}
-                                           onChange={e => setNewResult({...newResult, result: e.target.value})}
-                                           placeholder="Wynik" className={formStyles.input}/>
-                                    <input value={newResult.unit}
-                                           onChange={e => setNewResult({...newResult, unit: e.target.value})}
-                                           placeholder="Jednostka" className={formStyles.input}/>
-                                    <input value={newResult.referenceRange}
-                                           onChange={e => setNewResult({...newResult, referenceRange: e.target.value})}
-                                           placeholder="Zakres ref." className={formStyles.input}/>
+                            <form onSubmit={handleSubmit(handleAddResult)}
+                                  className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 space-y-3">
+                                <div>
+                                    <input placeholder="Nazwa badania (np. Kreatynina)"
+                                           className={formStyles.input} {...register("testName")} />
+                                    <FormError message={errors.testName?.message}/>
                                 </div>
-                                <input type="date" value={newResult.date}
-                                       onChange={e => setNewResult({...newResult, date: e.target.value})}
-                                       className={formStyles.input}/>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div>
+                                        <input placeholder="Wynik"
+                                               className={formStyles.input} {...register("result")} />
+                                        <FormError message={errors.result?.message}/>
+                                    </div>
+                                    <div>
+                                        <input placeholder="Jednostka"
+                                               className={formStyles.input} {...register("unit")} />
+                                        <FormError message={errors.unit?.message}/>
+                                    </div>
+                                    <div>
+                                        <input placeholder="Zakres ref."
+                                               className={formStyles.input} {...register("referenceRange")} />
+                                        <FormError message={errors.referenceRange?.message}/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <input type="date" className={formStyles.input} {...register("date")} />
+                                    <FormError message={errors.date?.message}/>
+                                </div>
                                 <div className="flex justify-end gap-2">
-                                    {/* 4. Zastosowanie semantycznych stylów dla przycisków akcji */}
-                                    <button onClick={() => setIsAdding(false)}
+                                    <button type="button" onClick={() => setIsAdding(false)}
                                             className={`${formStyles.buttonCancel} w-auto text-sm px-3 py-1.5`}>Anuluj
                                     </button>
-                                    <button onClick={handleAddResult}
+                                    <button type="submit"
                                             className={`${formStyles.buttonSubmit} w-auto text-sm px-3 py-1.5`}>Zapisz
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         )}
                         <div className="space-y-2">
                             {results.length > 0 ? results.map(res => (
@@ -131,8 +146,12 @@ const LabResultsModal = ({catId, onCancel}) => {
                                             ref.: {res.referenceRange} |
                                             Data: {res.date.toDate().toLocaleDateString('pl-PL')}</p>
                                     </div>
-                                    <button onClick={() => handleDeleteResult(res.id)}
-                                            className="p-2 text-gray-400 hover:text-red-500"><LucideTrash2 size={16}/>
+                                    <button
+                                        onClick={() => handleDeleteResult(res.id)}
+                                        className="p-2 text-gray-400 hover:text-red-500"
+                                        aria-label={`Usuń wynik badania ${res.testName}`}
+                                    >
+                                        <LucideTrash2 size={16}/>
                                     </button>
                                 </div>
                             )) : (
