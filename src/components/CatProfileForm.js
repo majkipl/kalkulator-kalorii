@@ -1,35 +1,38 @@
 // /src/components/CatProfileForm.js
 
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { catProfileSchema } from '../schemas/catProfileSchema';
+import React, {useState, useRef, useEffect} from 'react';
+import {useForm, Controller} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {catProfileSchema} from '../schemas/catProfileSchema';
 import Select from 'react-select';
-import { LucideSave, LucideTrash2 } from 'lucide-react';
+import {LucideSave, LucideTrash2} from 'lucide-react';
 
 // Importy z projektu
-import { useAppContext } from '../context/AppContext';
-import { formStyles, getCustomSelectStyles, typographyStyles } from '../utils/formStyles';
-import { breedOptions, activityLevelOptions, physiologicalStateOptions, chronicDiseaseOptions } from '../config/options';
+import {useAppContext} from '../context/AppContext';
+import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/formStyles';
+import {
+    breedOptions,
+    activityLevelOptions,
+    physiologicalStateOptions,
+    chronicDiseaseOptions
+} from '../config/options';
 
 /**
  * Mały komponent pomocniczy do wyświetlania błędów walidacji.
  * @param {{message: string}} props
  */
-const FormError = ({ message }) => {
+const FormError = ({message}) => {
     if (!message) return null;
     return <p className="text-sm text-red-500 mt-1">{message}</p>;
 };
 
-const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
-    const { isDark } = useAppContext();
+const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
+    const {isDark} = useAppContext();
 
-    /**
-     * Inicjalizacja react-hook-form.
-     * - `resolver` łączy formularz z naszym schematem walidacji Zod.
-     * - `defaultValues` ustawia początkowe wartości formularza.
-     */
-    const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
+    // 1. Tworzymy referencję do pierwszego pola formularza
+    const firstInputRef = useRef(null);
+
+    const {register, handleSubmit, control, formState: {errors}, reset} = useForm({
         resolver: zodResolver(catProfileSchema),
         defaultValues: {
             name: cat?.name || '',
@@ -45,10 +48,16 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
         }
     });
 
-    /**
-     * Efekt, który resetuje wartości formularza, gdy zmienia się obiekt `cat`.
-     * Przydatne, gdyby ten sam komponent był używany do przełączania się między edycją różnych profili.
-     */
+    // 2. Efekt, który ustawi focus na pierwszym polu, gdy formularz jest w trybie tworzenia nowego kota
+    useEffect(() => {
+        // Sprawdzamy, czy `cat` nie istnieje (tryb tworzenia)
+        if (!cat && firstInputRef.current) {
+            setTimeout(() => {
+                firstInputRef.current.focus();
+            }, 100);
+        }
+    }, [cat]); // Efekt uruchomi się, gdy zmieni się prop `cat`
+
     useEffect(() => {
         if (cat) {
             reset({
@@ -68,11 +77,6 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
 
     const customSelectStyles = getCustomSelectStyles(isDark);
 
-    /**
-     * Ta funkcja jest wywoływana przez `handleSubmit` tylko wtedy,
-     * gdy dane przejdą walidację zdefiniowaną w schemacie Zod.
-     * @param {object} data - Poprawne, zwalidowane dane z formularza.
-     */
     const processSubmit = (data) => {
         const finalAge = parseInt(data.years, 10) + (parseInt(data.months, 10) / 12);
 
@@ -97,43 +101,71 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
 
                 <div>
                     <label className={typographyStyles.label}>Nazwa kota</label>
-                    <input type="text" {...register("name")} className={formStyles.input} />
-                    <FormError message={errors.name?.message} />
+                    <input
+                        type="text"
+                        {...register("name")}
+                        className={formStyles.input}
+                        ref={firstInputRef} // 3. Dowiązujemy ref
+                        aria-invalid={errors.name ? "true" : "false"}
+                    />
+                    <FormError message={errors.name?.message}/>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={typographyStyles.label}>Aktualna waga (kg)</label>
-                        <input type="number" step="0.01" {...register("currentWeight")} className={formStyles.input} />
-                        <FormError message={errors.currentWeight?.message} />
+                        <input
+                            type="number"
+                            step="0.01"
+                            {...register("currentWeight")}
+                            className={formStyles.input}
+                            aria-invalid={errors.currentWeight ? "true" : "false"}
+                        />
+                        <FormError message={errors.currentWeight?.message}/>
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Docelowa waga (kg)</label>
-                        <input type="number" step="0.01" {...register("targetWeight")} className={formStyles.input} placeholder="Opcjonalnie" />
-                        <FormError message={errors.targetWeight?.message} />
+                        <input
+                            type="number"
+                            step="0.01"
+                            {...register("targetWeight")}
+                            className={formStyles.input}
+                            placeholder="Opcjonalnie"
+                            aria-invalid={errors.targetWeight ? "true" : "false"}
+                        />
+                        <FormError message={errors.targetWeight?.message}/>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={typographyStyles.label}>Wiek (lata)</label>
-                        <input type="number" {...register("years")} className={formStyles.input} />
-                        <FormError message={errors.years?.message} />
+                        <input
+                            type="number"
+                            {...register("years")}
+                            className={formStyles.input}
+                            aria-invalid={errors.years ? "true" : "false"}
+                        />
+                        <FormError message={errors.years?.message}/>
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Miesiące</label>
-                        <input type="number" {...register("months")} className={formStyles.input} />
-                        <FormError message={errors.months?.message} />
+                        <input
+                            type="number"
+                            {...register("months")}
+                            className={formStyles.input}
+                            aria-invalid={errors.months ? "true" : "false"}
+                        />
+                        <FormError message={errors.months?.message}/>
                     </div>
                 </div>
 
-                {/* Wzorzec <Controller> jest używany do integracji z zewnętrznymi bibliotekami UI jak react-select */}
                 <div>
                     <label className={typographyStyles.label}>Rasa</label>
                     <Controller
                         name="breed"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Select
                                 {...field}
                                 options={breedOptions}
@@ -141,10 +173,11 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
+                                aria-invalid={errors.breed ? "true" : "false"}
                             />
                         )}
                     />
-                    <FormError message={errors.breed?.message} />
+                    <FormError message={errors.breed?.message}/>
                 </div>
 
                 <div>
@@ -152,7 +185,7 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                     <Controller
                         name="activityLevel"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Select
                                 {...field}
                                 options={activityLevelOptions}
@@ -160,10 +193,11 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
+                                aria-invalid={errors.activityLevel ? "true" : "false"}
                             />
                         )}
                     />
-                    <FormError message={errors.activityLevel?.message} />
+                    <FormError message={errors.activityLevel?.message}/>
                 </div>
 
                 <div>
@@ -171,7 +205,7 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                     <Controller
                         name="physiologicalState"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Select
                                 {...field}
                                 options={physiologicalStateOptions}
@@ -179,10 +213,11 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
+                                aria-invalid={errors.physiologicalState ? "true" : "false"}
                             />
                         )}
                     />
-                    <FormError message={errors.physiologicalState?.message} />
+                    <FormError message={errors.physiologicalState?.message}/>
                 </div>
 
                 <div>
@@ -190,7 +225,7 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                     <Controller
                         name="chronicDisease"
                         control={control}
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Select
                                 {...field}
                                 options={chronicDiseaseOptions}
@@ -198,15 +233,17 @@ const CatProfileForm = ({ cat, onSave, onCancel, onDeleteRequest }) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
+                                aria-invalid={errors.chronicDisease ? "true" : "false"}
                             />
                         )}
                     />
-                    <FormError message={errors.chronicDisease?.message} />
+                    <FormError message={errors.chronicDisease?.message}/>
                 </div>
 
                 <div className="flex items-center">
-                    <input type="checkbox" id="isNeutered" {...register("isNeutered")} className={formStyles.checkbox} />
-                    <label htmlFor="isNeutered" className={`${typographyStyles.label} ml-2 font-normal`}>Kot sterylizowany/kastrowany</label>
+                    <input type="checkbox" id="isNeutered" {...register("isNeutered")} className={formStyles.checkbox}/>
+                    <label htmlFor="isNeutered" className={`${typographyStyles.label} ml-2 font-normal`}>Kot
+                        sterylizowany/kastrowany</label>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">

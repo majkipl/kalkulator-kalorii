@@ -27,6 +27,9 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef(null);
 
+    // 1. Tworzymy referencję do pierwszego pola formularza
+    const firstInputRef = useRef(null);
+
     const {register, handleSubmit, control, formState: {errors}, reset, setValue, watch} = useForm({
         resolver: zodResolver(foodSchema),
         defaultValues: {
@@ -37,8 +40,14 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
         }
     });
 
-    // Obserwujemy wartość photoURL, aby dynamicznie aktualizować podgląd
     const photoURL = watch('photoURL');
+
+    // 2. Efekt, który ustawi focus, gdy komponent się zamontuje
+    useEffect(() => {
+        setTimeout(() => {
+            firstInputRef.current?.focus();
+        }, 100);
+    }, []);
 
     useEffect(() => {
         if (initialData) {
@@ -87,7 +96,6 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                 ctx.drawImage(img, 0, 0, width, height);
 
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                // Ustawiamy wartość w react-hook-form
                 setValue('photoURL', dataUrl, {shouldValidate: true});
                 setIsProcessing(false);
             };
@@ -102,7 +110,6 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
         };
     };
 
-    // Funkcja `onSave` jest wywoływana tylko po pomyślnej walidacji
     const processSubmit = (data) => {
         onSave({...data, calories: parseInt(data.calories, 10) || 0});
     };
@@ -140,12 +147,23 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
 
                     <div>
                         <label className={typographyStyles.label}>Nazwa karmy</label>
-                        <input type="text" {...register("name")} className={formStyles.input}/>
+                        <input
+                            type="text"
+                            {...register("name")}
+                            className={formStyles.input}
+                            ref={firstInputRef} // 3. Dowiązujemy ref
+                            aria-invalid={errors.name ? "true" : "false"}
+                        />
                         <FormError message={errors.name?.message}/>
                     </div>
                     <div>
                         <label className={typographyStyles.label}>Kaloryczność (kcal / 100g)</label>
-                        <input type="number" {...register("calories")} className={formStyles.input}/>
+                        <input
+                            type="number"
+                            {...register("calories")}
+                            className={formStyles.input}
+                            aria-invalid={errors.calories ? "true" : "false"}
+                        />
                         <FormError message={errors.calories?.message}/>
                     </div>
                     <div>

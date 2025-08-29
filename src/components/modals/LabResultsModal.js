@@ -1,6 +1,6 @@
 // /src/components/modals/LabResultsModal.js
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {labResultSchema} from '../../schemas/labResultSchema';
@@ -25,18 +25,18 @@ const FormError = ({message}) => {
 };
 
 const LabResultsModal = ({catId, onCancel}) => {
-    // Pobieramy dane globalne
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
-    // Stany lokalne
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
 
+    // 1. Tworzymy referencję do pierwszego pola formularza
+    const firstInputRef = useRef(null);
+
     const catsPath = userCatsCollectionPath(user.uid);
 
-    // Inicjalizacja react-hook-form
     const {register, handleSubmit, formState: {errors}, reset} = useForm({
         resolver: zodResolver(labResultSchema),
         defaultValues: {
@@ -47,6 +47,15 @@ const LabResultsModal = ({catId, onCancel}) => {
             date: new Date().toISOString().split('T')[0],
         }
     });
+
+    // 2. Efekt, który ustawi focus, gdy formularz dodawania stanie się widoczny
+    useEffect(() => {
+        if (isAdding && firstInputRef.current) {
+            setTimeout(() => {
+                firstInputRef.current.focus();
+            }, 100);
+        }
+    }, [isAdding]);
 
     useEffect(() => {
         const resultsCol = collection(db, catsPath, catId, 'labResults');
@@ -63,7 +72,7 @@ const LabResultsModal = ({catId, onCancel}) => {
             const resultsCol = collection(db, catsPath, catId, 'labResults');
             await addDoc(resultsCol, {...data, date: new Date(data.date)});
 
-            reset(); // Czyści formularz
+            reset();
             setIsAdding(false);
             showToast("Wynik badania został dodany.");
         } catch (error) {
@@ -100,29 +109,51 @@ const LabResultsModal = ({catId, onCancel}) => {
                             <form onSubmit={handleSubmit(handleAddResult)}
                                   className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 space-y-3">
                                 <div>
-                                    <input placeholder="Nazwa badania (np. Kreatynina)"
-                                           className={formStyles.input} {...register("testName")} />
+                                    <input
+                                        placeholder="Nazwa badania (np. Kreatynina)"
+                                        className={formStyles.input}
+                                        {...register("testName")}
+                                        ref={firstInputRef} // 3. Dowiązujemy ref
+                                        aria-invalid={errors.testName ? "true" : "false"}
+                                    />
                                     <FormError message={errors.testName?.message}/>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     <div>
-                                        <input placeholder="Wynik"
-                                               className={formStyles.input} {...register("result")} />
+                                        <input
+                                            placeholder="Wynik"
+                                            className={formStyles.input}
+                                            {...register("result")}
+                                            aria-invalid={errors.result ? "true" : "false"}
+                                        />
                                         <FormError message={errors.result?.message}/>
                                     </div>
                                     <div>
-                                        <input placeholder="Jednostka"
-                                               className={formStyles.input} {...register("unit")} />
+                                        <input
+                                            placeholder="Jednostka"
+                                            className={formStyles.input}
+                                            {...register("unit")}
+                                            aria-invalid={errors.unit ? "true" : "false"}
+                                        />
                                         <FormError message={errors.unit?.message}/>
                                     </div>
                                     <div>
-                                        <input placeholder="Zakres ref."
-                                               className={formStyles.input} {...register("referenceRange")} />
+                                        <input
+                                            placeholder="Zakres ref."
+                                            className={formStyles.input}
+                                            {...register("referenceRange")}
+                                            aria-invalid={errors.referenceRange ? "true" : "false"}
+                                        />
                                         <FormError message={errors.referenceRange?.message}/>
                                     </div>
                                 </div>
                                 <div>
-                                    <input type="date" className={formStyles.input} {...register("date")} />
+                                    <input
+                                        type="date"
+                                        className={formStyles.input}
+                                        {...register("date")}
+                                        aria-invalid={errors.date ? "true" : "false"}
+                                    />
                                     <FormError message={errors.date?.message}/>
                                 </div>
                                 <div className="flex justify-end gap-2">

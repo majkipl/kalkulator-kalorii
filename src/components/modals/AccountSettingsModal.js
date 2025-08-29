@@ -1,6 +1,5 @@
 // /src/components/modals/AccountSettingsModal.js
-
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {changePasswordSchema} from '../../schemas/changePasswordSchema';
@@ -15,7 +14,7 @@ import {auth} from '../../firebase/config';
 import Spinner from '../../shared/Spinner';
 import {LucideX, LucideCheckCircle} from 'lucide-react';
 
-// Importy hooków i stylów
+// Importy hooków, stylów i komponentów
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 import {formStyles, typographyStyles} from '../../utils/formStyles';
@@ -30,16 +29,16 @@ const FormError = ({message}) => {
 };
 
 const AccountSettingsModal = ({onCancel}) => {
-    // Pobieramy dane globalne
     const {user} = useAuth();
     const {showToast} = useAppContext();
 
-    // Stany lokalne (dla logiki niezwiązanej z formularzem hasła)
     const [isLinking, setIsLinking] = useState(false);
     const [showPasswordFields, setShowPasswordFields] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-    // Inicjalizacja react-hook-form dla formularza zmiany hasła
+    // 1. Tworzymy referencję do pierwszego inputa
+    const firstInputRef = useRef(null);
+
     const {register, handleSubmit, formState: {errors}, reset} = useForm({
         resolver: zodResolver(changePasswordSchema),
         defaultValues: {
@@ -48,6 +47,16 @@ const AccountSettingsModal = ({onCancel}) => {
             confirmPassword: '',
         }
     });
+
+    // 2. Efekt, który ustawi focus, gdy formularz zmiany hasła stanie się widoczny
+    useEffect(() => {
+        if (showPasswordFields && firstInputRef.current) {
+            // Używamy setTimeout, aby dać przeglądarce chwilę na wyrenderowanie inputa
+            setTimeout(() => {
+                firstInputRef.current.focus();
+            }, 100);
+        }
+    }, [showPasswordFields]);
 
     const isGoogleLinked = user.providerData.some(provider => provider.providerId === 'google.com');
     const isEmailProvider = user.providerData.some(provider => provider.providerId === 'password');
@@ -69,7 +78,6 @@ const AccountSettingsModal = ({onCancel}) => {
         }
     };
 
-    // Ta funkcja jest wywoływana tylko po pomyślnej walidacji po stronie klienta
     const processPasswordChange = async (data) => {
         setIsChangingPassword(true);
         const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
@@ -79,7 +87,7 @@ const AccountSettingsModal = ({onCancel}) => {
             await updatePassword(user, data.newPassword);
 
             showToast("Hasło zostało pomyślnie zmienione.", "success");
-            reset(); // Czyści formularz
+            reset();
             setShowPasswordFields(false);
         } catch (error) {
             let message = "Wystąpił błąd podczas zmiany hasła.";
@@ -144,18 +152,34 @@ const AccountSettingsModal = ({onCancel}) => {
                                 <form onSubmit={handleSubmit(processPasswordChange)}
                                       className="space-y-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                     <div>
-                                        <input type="password" placeholder="Aktualne hasło"
-                                               className={formStyles.input} {...register("currentPassword")} />
+                                        <input
+                                            type="password"
+                                            placeholder="Aktualne hasło"
+                                            className={formStyles.input}
+                                            {...register("currentPassword")}
+                                            ref={firstInputRef}
+                                            aria-invalid={errors.currentPassword ? "true" : "false"}
+                                        />
                                         <FormError message={errors.currentPassword?.message}/>
                                     </div>
                                     <div>
-                                        <input type="password" placeholder="Nowe hasło"
-                                               className={formStyles.input} {...register("newPassword")} />
+                                        <input
+                                            type="password"
+                                            placeholder="Nowe hasło"
+                                            className={formStyles.input}
+                                            {...register("newPassword")}
+                                            aria-invalid={errors.newPassword ? "true" : "false"}
+                                        />
                                         <FormError message={errors.newPassword?.message}/>
                                     </div>
                                     <div>
-                                        <input type="password" placeholder="Potwierdź nowe hasło"
-                                               className={formStyles.input} {...register("confirmPassword")} />
+                                        <input
+                                            type="password"
+                                            placeholder="Potwierdź nowe hasło"
+                                            className={formStyles.input}
+                                            {...register("confirmPassword")}
+                                            aria-invalid={errors.confirmPassword ? "true" : "false"}
+                                        />
                                         <FormError message={errors.confirmPassword?.message}/>
                                     </div>
                                     <div className="flex justify-end gap-2 pt-2">
