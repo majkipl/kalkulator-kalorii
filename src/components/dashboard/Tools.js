@@ -3,9 +3,11 @@
 import React from 'react';
 import {
     LucideBone, LucideChevronDown, LucideSettings, LucidePlusCircle, LucideList,
-    LucideBarChart3, LucideDownload, LucideTestTube
+    LucideBarChart3, LucideDownload, LucideTestTube, LucideBookMarked
 } from 'lucide-react';
-import {typographyStyles} from "../../utils/formStyles";
+
+// Import ujednoliconych stylów
+import {formStyles, typographyStyles} from '../../utils/formStyles';
 
 const Tools = ({
                    onAccountSettingsClick,
@@ -14,12 +16,13 @@ const Tools = ({
                    onStatsClick,
                    onExportClick,
                    onLabResultsClick,
+                   onManageVetsClick, // Nowy prop dla modala weterynarzy
                    collapsible
                }) => {
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
             <div {...collapsible.triggerProps}>
-                <h2 className={`${typographyStyles.h2} flex items-center`}>
+                <h2 className={typographyStyles.h2}>
                     <LucideBone className="mr-2 h-6 w-6 text-indigo-500"/>Narzędzia
                 </h2>
                 <LucideChevronDown
@@ -28,28 +31,26 @@ const Tools = ({
             <div {...collapsible.contentProps}>
                 <div className="overflow-hidden">
                     <div className="pt-4 space-y-2">
-                        <button onClick={onAccountSettingsClick}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        <button onClick={onAccountSettingsClick} className={formStyles.buttonSecondary}>
                             <LucideSettings className="mr-2 h-5 w-5"/> Ustawienia konta
                         </button>
-                        <button onClick={onAddFoodClick}
-                                className="w-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/80 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        <button onClick={onAddFoodClick} className={formStyles.buttonTertiary}>
                             <LucidePlusCircle className="mr-2 h-5 w-5"/> Dodaj nową karmę
                         </button>
-                        <button onClick={onManageFoodsClick}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        <button onClick={onManageFoodsClick} className={formStyles.buttonSecondary}>
                             <LucideList className="mr-2 h-5 w-5"/> Zarządzaj karmami
                         </button>
-                        <button onClick={onStatsClick}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        {/* Nowy przycisk do zarządzania weterynarzami */}
+                        <button onClick={onManageVetsClick} className={formStyles.buttonSecondary}>
+                            <LucideBookMarked className="mr-2 h-5 w-5"/> Moi Weterynarze
+                        </button>
+                        <button onClick={onStatsClick} className={formStyles.buttonSecondary}>
                             <LucideBarChart3 className="mr-2 h-5 w-5"/> Pokaż statystyki
                         </button>
-                        <button onClick={onExportClick}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        <button onClick={onExportClick} className={formStyles.buttonSecondary}>
                             <LucideDownload className="mr-2 h-5 w-5"/> Eksportuj dane
                         </button>
-                        <button onClick={onLabResultsClick}
-                                className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                        <button onClick={onLabResultsClick} className={formStyles.buttonSecondary}>
                             <LucideTestTube className="mr-2 h-5 w-5"/> Wyniki badań
                         </button>
                     </div>

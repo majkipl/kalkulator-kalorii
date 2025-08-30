@@ -3,14 +3,20 @@
 import React, {useState, useEffect} from 'react';
 import {collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc, orderBy} from 'firebase/firestore';
 import {db} from '../../firebase/config';
-import {userCatsCollectionPath} from '../../firebase/paths';
+import {userCatsCollectionPath, userVetsCollectionPath} from '../../firebase/paths';
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
+
+// Importy komponentów podrzędnych i modali
 import DailyHealthLog from './DailyHealthLog';
 import VetVisitFormModal from '../modals/VetVisitFormModal';
 import ParasiteControlFormModal from '../modals/ParasiteControlFormModal';
-import {LucidePlusCircle, LucideTrash2, LucidePencil} from 'lucide-react';
+
+// Importy stylów i ikon
 import {typographyStyles} from '../../utils/formStyles';
+import {LucidePlusCircle, LucideTrash2, LucidePencil} from 'lucide-react';
+import FormError from '../../shared/FormError';
+
 
 const HealthJournal = ({catId, currentDate}) => {
     const {user} = useAuth();
@@ -18,20 +24,16 @@ const HealthJournal = ({catId, currentDate}) => {
     const [activeTab, setActiveTab] = useState('symptoms');
     const [isEditingDailyLog, setIsEditingDailyLog] = useState(false);
 
+    // Stany dla danych z podkolekcji
     const [vetVisits, setVetVisits] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
     const [deworming, setDeworming] = useState([]);
+    const [vets, setVets] = useState([]); // Stan na listę weterynarzy
 
-    // Dodajemy stan dla danych z bieżącego dnia
-    const [dailyData, setDailyData] = useState({
-        meals: [],
-        der: 0,
-        note: '',
-        waterIntake: '',
-        medications: '',
-        symptomTags: []
-    });
+    // Stan dla danych z bieżącego dnia (dla zakładki "Codzienne Objawy")
+    const [dailyData, setDailyData] = useState({note: '', waterIntake: '', medications: '', symptomTags: []});
 
+    // Stan do zarządzania otwieraniem modali
     const [modalState, setModalState] = useState({
         vetVisit: {isOpen: false, data: null},
         vaccination: {isOpen: false, data: null},
@@ -39,8 +41,9 @@ const HealthJournal = ({catId, currentDate}) => {
     });
 
     const catsPath = userCatsCollectionPath(user.uid);
+    const vetsPath = userVetsCollectionPath(user.uid);
 
-    // Efekt do pobierania danych dla zakładek (Wizyty, Szczepienia, etc.)
+    // Efekty do pobierania danych
     useEffect(() => {
         const path = (subcollection) => collection(db, catsPath, catId, subcollection);
         const q = (subcollection) => query(path(subcollection), orderBy('date', 'desc'));
@@ -49,14 +52,18 @@ const HealthJournal = ({catId, currentDate}) => {
         const unsubVaccinations = onSnapshot(q('vaccinations'), snapshot => setVaccinations(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
         const unsubDeworming = onSnapshot(q('deworming'), snapshot => setDeworming(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
 
+        // Pobieranie listy weterynarzy
+        const qVets = query(collection(db, vetsPath));
+        const unsubVets = onSnapshot(qVets, snapshot => setVets(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
+
         return () => {
             unsubVisits();
             unsubVaccinations();
             unsubDeworming();
+            unsubVets();
         };
-    }, [catId, catsPath]);
+    }, [catId, catsPath, vetsPath]);
 
-    // Efekt do pobierania danych dla zakładki Codzienne Objawy (przeniesiony z Dashboard)
     useEffect(() => {
         if (!catId || !currentDate) return;
         const mealDocRef = doc(db, catsPath, catId, 'meals', currentDate);
@@ -64,20 +71,19 @@ const HealthJournal = ({catId, currentDate}) => {
             if (doc.exists()) {
                 const data = doc.data();
                 setDailyData({
-                    meals: data.meals || [],
-                    der: data.der || 0,
                     note: data.note || '',
                     waterIntake: data.waterIntake || '',
                     medications: data.medications || '',
                     symptomTags: data.symptomTags || []
                 });
             } else {
-                setDailyData({meals: [], der: 0, note: '', waterIntake: '', medications: '', symptomTags: []});
+                setDailyData({note: '', waterIntake: '', medications: '', symptomTags: []});
             }
         });
         return () => unsubMeals();
     }, [catId, currentDate, catsPath]);
 
+    // Handlery do zapisu i usuwania
     const handleSave = async (subcollection, data, id) => {
         try {
             if (id) {
@@ -89,6 +95,7 @@ const HealthJournal = ({catId, currentDate}) => {
             }
             return true;
         } catch (error) {
+            console.error("Błąd zapisu:", error);
             showToast("Wystąpił błąd podczas zapisu.", "error");
             return false;
         }
@@ -123,7 +130,7 @@ const HealthJournal = ({catId, currentDate}) => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
                     <h2 className={typographyStyles.h2}>Dziennik Zdrowia</h2>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                         <TabButton tabName="symptoms" label="Codzienne Objawy"/>
                         <TabButton tabName="visits" label="Wizyty"/>
                         <TabButton tabName="vaccinations" label="Szczepienia"/>
@@ -154,11 +161,12 @@ const HealthJournal = ({catId, currentDate}) => {
                                         <p>
                                             <strong>{new Date(visit.date.seconds * 1000).toLocaleDateString()} - {visit.reason}</strong>
                                         </p>
-                                        {visit.diagnosis && <p className="text-sm">Diagnoza: {visit.diagnosis}</p>}
+                                        <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{visit.vetName}</p>
+                                        {visit.diagnosis && <p className="text-sm mt-1">Diagnoza: {visit.diagnosis}</p>}
                                         {visit.recommendations &&
-                                            <p className="text-sm">Zalecenia: {visit.recommendations}</p>}
+                                            <p className="text-sm mt-1">Zalecenia: {visit.recommendations}</p>}
                                     </div>
-                                    <div>
+                                    <div className="flex-shrink-0">
                                         <button onClick={() => setModalState(s => ({
                                             ...s,
                                             vetVisit: {isOpen: true, data: visit}
@@ -168,7 +176,7 @@ const HealthJournal = ({catId, currentDate}) => {
                                     </div>
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500">Brak zapisanych wizyt.</p>}
+                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych wizyt.</p>}
                     </div>
                 )}
                 {activeTab === 'vaccinations' && (
@@ -188,7 +196,7 @@ const HealthJournal = ({catId, currentDate}) => {
                                             <p className="text-sm text-amber-600 dark:text-amber-400">Następna
                                                 dawka: {new Date(vac.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
                                     </div>
-                                    <div>
+                                    <div className="flex-shrink-0">
                                         <button onClick={() => setModalState(s => ({
                                             ...s,
                                             vaccination: {isOpen: true, data: vac}
@@ -198,14 +206,14 @@ const HealthJournal = ({catId, currentDate}) => {
                                     </div>
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500">Brak zapisanych szczepień.</p>}
+                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych szczepień.</p>}
                     </div>
                 )}
                 {activeTab === 'deworming' && (
                     <div>
                         <button className="flex items-center text-indigo-500 mb-4"
                                 onClick={() => setModalState(s => ({...s, deworming: {isOpen: true, data: null}}))}>
-                            <LucidePlusCircle className="mr-2"/> Dodaj odrobaczenie
+                            <LucidePlusCircle className="mr-2"/> Dodaj odrobaczanie
                         </button>
                         {deworming.length > 0 ? deworming.map(dew => (
                             <div key={dew.id} className="mb-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -218,7 +226,7 @@ const HealthJournal = ({catId, currentDate}) => {
                                             <p className="text-sm text-amber-600 dark:text-amber-400">Następna
                                                 dawka: {new Date(dew.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
                                     </div>
-                                    <div>
+                                    <div className="flex-shrink-0">
                                         <button onClick={() => setModalState(s => ({
                                             ...s,
                                             deworming: {isOpen: true, data: dew}
@@ -228,13 +236,13 @@ const HealthJournal = ({catId, currentDate}) => {
                                     </div>
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500">Brak zapisanych odrobaczeń.</p>}
+                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych odrobaczeń.</p>}
                     </div>
                 )}
-
             </div>
 
             {modalState.vetVisit.isOpen && <VetVisitFormModal
+                vets={vets}
                 onCancel={() => setModalState(s => ({...s, vetVisit: {isOpen: false, data: null}}))}
                 onSave={async (data) => {
                     const success = await handleSave('vetVisits', data, modalState.vetVisit.data?.id);

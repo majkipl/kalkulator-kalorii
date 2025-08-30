@@ -34,7 +34,7 @@ import CatProfile from './CatProfile';
 import WeightTracker from './WeightTracker';
 import Tools from './Tools';
 import MealLog from './MealLog';
-import HealthJournal from './HealthJournal'; // Zastąpiono DailyHealthLog
+import HealthJournal from './HealthJournal';
 import DashboardStats from './DashboardStats';
 import Spinner from '../../shared/Spinner';
 import ThemeSwitcher from '../../shared/ThemeSwitcher';
@@ -49,7 +49,9 @@ import ExportModal from '../modals/ExportModal';
 import LabResultsModal from '../modals/LabResultsModal';
 import DeleteCatModal from '../modals/DeleteCatModal';
 import MealFormModal from '../modals/MealFormModal';
+import VetManagementModal from '../modals/VetManagementModal';
 import {formStyles} from "../../utils/formStyles";
+
 
 const Dashboard = () => {
     // --- Hooki z React Router i Context API ---
@@ -62,14 +64,7 @@ const Dashboard = () => {
     const [cat, setCat] = useState(null);
     const [foods, setFoods] = useState([]);
     const [hiddenFoodIds, setHiddenFoodIds] = useState([]);
-    const [dailyData, setDailyData] = useState({
-        meals: [],
-        der: 0,
-        note: '',
-        waterIntake: '',
-        medications: '',
-        symptomTags: []
-    });
+    const [dailyData, setDailyData] = useState({meals: [], der: 0});
     const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(true);
 
@@ -86,6 +81,7 @@ const Dashboard = () => {
     const [isViewingLabResults, setIsViewingLabResults] = useState(false);
     const [isDeletingCat, setIsDeletingCat] = useState(false);
     const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false);
+    const [isVetModalOpen, setIsVetModalOpen] = useState(false);
     const [foodToEdit, setFoodToEdit] = useState(null);
     const [mealToEdit, setMealToEdit] = useState(null);
     const [isAddingFood, setIsAddingFood] = useState(false);
@@ -129,6 +125,23 @@ const Dashboard = () => {
             unsubPrefs();
         };
     }, [catId, user.uid, navigate, showToast, catsPath]);
+
+    useEffect(() => {
+        if (!catId || !currentDate) return;
+        const mealDocRef = doc(db, catsPath, catId, 'meals', currentDate);
+        const unsubMeals = onSnapshot(mealDocRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setDailyData({
+                    meals: data.meals || [],
+                    der: data.der || 0,
+                });
+            } else {
+                setDailyData({meals: [], der: 0});
+            }
+        });
+        return () => unsubMeals();
+    }, [catId, currentDate, catsPath]);
 
     useEffect(() => {
         if (!catId || !user?.uid) return;
@@ -217,14 +230,7 @@ const Dashboard = () => {
             if (docSnap.exists()) {
                 await updateDoc(mealDocRef, {meals: arrayUnion(newMeal)});
             } else {
-                await setDoc(mealDocRef, {
-                    meals: [newMeal],
-                    der: calculateDer(cat),
-                    note: '',
-                    waterIntake: '',
-                    medications: '',
-                    symptomTags: []
-                });
+                await setDoc(mealDocRef, {meals: [newMeal], der: calculateDer(cat)});
             }
             showToast("Posiłek został dodany.");
         } catch (error) {
@@ -341,6 +347,7 @@ const Dashboard = () => {
                         onStatsClick={() => setIsShowingStats(true)}
                         onExportClick={() => setIsExporting(true)}
                         onLabResultsClick={() => setIsViewingLabResults(true)}
+                        onManageVetsClick={() => setIsVetModalOpen(true)}
                         collapsible={toolsCollapsible}
                     />
                 </div>
@@ -386,6 +393,7 @@ const Dashboard = () => {
             {isShowingStats && <StatisticsModal catId={catId} onCancel={() => setIsShowingStats(false)}/>}
             {isExporting && <ExportModal catId={catId} onCancel={() => setIsExporting(false)}/>}
             {isViewingLabResults && <LabResultsModal catId={catId} onCancel={() => setIsViewingLabResults(false)}/>}
+            {isVetModalOpen && <VetManagementModal onCancel={() => setIsVetModalOpen(false)}/>}
             {isDeletingCat &&
                 <DeleteCatModal onCancel={() => setIsDeletingCat(false)} onConfirm={handleConfirmDeleteCat}/>}
             {mealToEdit && <MealFormModal initialData={mealToEdit} foods={foods} onSave={handleUpdateMeal}

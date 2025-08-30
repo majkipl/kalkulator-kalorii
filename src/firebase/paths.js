@@ -22,3 +22,10 @@ export const userPrefsDocPath = (userId) => `artifacts/${appId}/users/${userId}/
  * @returns {string} Ścieżka do kolekcji.
  */
 export const foodsCollectionPath = `artifacts/${appId}/public/data/foods`;
+
+/**
+ * Zwraca ścieżkę do kolekcji weterynarzy danego użytkownika.
+ * @param {string} userId - ID użytkownika.
+ * @returns {string} Ścieżka do kolekcji.
+ */
+export const userVetsCollectionPath = (userId) => `artifacts/${appId}/users/${userId}/veterinarians`;
