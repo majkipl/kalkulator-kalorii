@@ -17,7 +17,6 @@ import {
     arrayUnion,
     arrayRemove,
     query,
-    where,
     orderBy
 } from 'firebase/firestore';
 import {EmailAuthProvider, reauthenticateWithCredential} from 'firebase/auth';
@@ -35,7 +34,7 @@ import CatProfile from './CatProfile';
 import WeightTracker from './WeightTracker';
 import Tools from './Tools';
 import MealLog from './MealLog';
-import DailyHealthLog from './DailyHealthLog';
+import HealthJournal from './HealthJournal'; // Zastąpiono DailyHealthLog
 import DashboardStats from './DashboardStats';
 import Spinner from '../../shared/Spinner';
 import ThemeSwitcher from '../../shared/ThemeSwitcher';
@@ -50,6 +49,7 @@ import ExportModal from '../modals/ExportModal';
 import LabResultsModal from '../modals/LabResultsModal';
 import DeleteCatModal from '../modals/DeleteCatModal';
 import MealFormModal from '../modals/MealFormModal';
+import {formStyles} from "../../utils/formStyles";
 
 const Dashboard = () => {
     // --- Hooki z React Router i Context API ---
@@ -72,9 +72,8 @@ const Dashboard = () => {
     });
     const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(true);
-    const [isEditingDailyLog, setIsEditingDailyLog] = useState(false);
 
-    // Stany na dane historyczne dla nowej sekcji statystyk
+    // Stany na dane historyczne dla sekcji statystyk
     const [historicalMeals, setHistoricalMeals] = useState([]);
     const [historicalWeight, setHistoricalWeight] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
@@ -132,34 +131,10 @@ const Dashboard = () => {
     }, [catId, user.uid, navigate, showToast, catsPath]);
 
     useEffect(() => {
-        if (!catId || !currentDate) return;
-        const mealDocRef = doc(db, catsPath, catId, 'meals', currentDate);
-        const unsubMeals = onSnapshot(mealDocRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                setDailyData({
-                    meals: data.meals || [],
-                    der: data.der || 0,
-                    note: data.note || '',
-                    waterIntake: data.waterIntake || '',
-                    medications: data.medications || '',
-                    symptomTags: data.symptomTags || []
-                });
-            } else {
-                setDailyData({meals: [], der: 0, note: '', waterIntake: '', medications: '', symptomTags: []});
-            }
-        });
-        return () => unsubMeals();
-    }, [catId, currentDate, catsPath]);
-
-    useEffect(() => {
         if (!catId || !user?.uid) return;
 
         const fetchHistory = async () => {
             setLoadingHistory(true);
-
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
             const mealsQuery = query(collection(db, catsPath, catId, 'meals'));
             const mealsSnapshot = await getDocs(mealsQuery);
@@ -289,7 +264,7 @@ const Dashboard = () => {
             const credential = EmailAuthProvider.credential(user.email, password);
             await reauthenticateWithCredential(user, credential);
 
-            const subcollections = ['meals', 'weightLog', 'labResults'];
+            const subcollections = ['meals', 'weightLog', 'labResults', 'vetVisits', 'vaccinations', 'deworming'];
             const batch = writeBatch(db);
             for (const sub of subcollections) {
                 const snapshot = await getDocs(collection(db, catsPath, catId, sub));
@@ -335,9 +310,9 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={() => navigate('/select-cat')}
-                                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg transition flex items-center justify-center p-2 md:py-2 md:px-4">
+                                className={formStyles.buttonSecondary + " w-auto text-sm"}>
                             <LucideUsers2 size={18} className="md:mr-2"/>
-                            <span className="hidden md:inline text-sm">Zmień kota</span>
+                            <span className="hidden md:inline">Zmień kota</span>
                         </button>
                         <button onClick={() => signOut(auth)}
                                 className="bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-900/80 text-red-700 dark:text-red-300 font-semibold rounded-lg transition flex items-center justify-center p-2 md:py-2 md:px-4">
@@ -393,13 +368,7 @@ const Dashboard = () => {
                         collapsible={mealLogCollapsible}
                         currentDer={calculateDer(cat)}
                     />
-                    <DailyHealthLog
-                        catId={catId}
-                        currentDate={currentDate}
-                        initialData={dailyData}
-                        isEditing={isEditingDailyLog}
-                        setIsEditing={setIsEditingDailyLog}
-                    />
+                    <HealthJournal catId={catId} currentDate={currentDate}/>
                 </div>
             </main>
 
