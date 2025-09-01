@@ -10,6 +10,7 @@ const buttonDestructiveClasses = "bg-red-500 hover:bg-red-600 text-white";
 const buttonSuccessClasses = "bg-green-500 hover:bg-green-600 text-white h-10";
 const buttonTertiaryClasses = "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/80";
 const buttonGoogleClasses = "bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-600";
+const buttonActionLightClasses = "p-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 rounded-md flex items-center";
 
 export const typographyStyles = {
     h1: "text-3xl font-bold text-gray-800 dark:text-gray-200",
@@ -31,10 +32,11 @@ export const formStyles = {
     buttonSuccess: `${buttonBase} ${buttonSuccessClasses}`,
     buttonTertiary: `${buttonBase} ${buttonTertiaryClasses}`,
     buttonGoogle: `${buttonBase} ${buttonGoogleClasses}`,
+    buttonActionLight: `${buttonBase} ${buttonActionLightClasses} w-auto`,
 
     // --- NOWE ALIASY SEMANTYCZNE ---
-    buttonSubmit: `${buttonBase} ${buttonPrimaryClasses}`, // Przycisk zatwierdzający (Submit) jest aliasem stylu Primary
-    buttonCancel: `${buttonBase} ${buttonSecondaryClasses}`, // Przycisk anulujący (Cancel) jest aliasem stylu Secondary
+    buttonSubmit: `${buttonBase} ${buttonPrimaryClasses}`,
+    buttonCancel: `${buttonBase} ${buttonSecondaryClasses}`,
 };
 
 // Funkcja generująca style dla react-select (bez zmian)

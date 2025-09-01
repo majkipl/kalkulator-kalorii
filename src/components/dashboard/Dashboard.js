@@ -50,17 +50,15 @@ import LabResultsModal from '../modals/LabResultsModal';
 import DeleteCatModal from '../modals/DeleteCatModal';
 import MealFormModal from '../modals/MealFormModal';
 import VetManagementModal from '../modals/VetManagementModal';
-import {formStyles} from "../../utils/formStyles";
+import {formStyles} from '../../utils/formStyles';
 
 
 const Dashboard = () => {
-    // --- Hooki z React Router i Context API ---
     const {catId} = useParams();
     const navigate = useNavigate();
     const {user} = useAuth();
     const {showToast, theme, setTheme} = useAppContext();
 
-    // --- Stany wewnętrzne komponentu ---
     const [cat, setCat] = useState(null);
     const [foods, setFoods] = useState([]);
     const [hiddenFoodIds, setHiddenFoodIds] = useState([]);
@@ -68,12 +66,10 @@ const Dashboard = () => {
     const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
     const [loading, setLoading] = useState(true);
 
-    // Stany na dane historyczne dla sekcji statystyk
     const [historicalMeals, setHistoricalMeals] = useState([]);
     const [historicalWeight, setHistoricalWeight] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
 
-    // Stany do zarządzania widocznością okien modalnych
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [isManagingFoods, setIsManagingFoods] = useState(false);
     const [isShowingStats, setIsShowingStats] = useState(false);
@@ -86,7 +82,6 @@ const Dashboard = () => {
     const [mealToEdit, setMealToEdit] = useState(null);
     const [isAddingFood, setIsAddingFood] = useState(false);
 
-    // Hooki dla zwijanych sekcji
     const profileCollapsible = useCollapsible();
     const weightCollapsible = useCollapsible();
     const toolsCollapsible = useCollapsible();
@@ -95,7 +90,6 @@ const Dashboard = () => {
 
     const catsPath = userCatsCollectionPath(user.uid);
 
-    // --- Efekty do pobierania danych z Firestore ---
     useEffect(() => {
         if (!catId || !user?.uid) return;
 
@@ -112,7 +106,7 @@ const Dashboard = () => {
         });
 
         const qFoods = onSnapshot(collection(db, foodsCollectionPath), (snapshot) => {
-            setFoods(snapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+            setFoods(snapshot.docs.map(d => ({id: d.id, ...d.data()})));
         });
 
         const unsubPrefs = onSnapshot(doc(db, userPrefsDocPath(user.uid)), (docSnap) => {
@@ -169,7 +163,6 @@ const Dashboard = () => {
         });
     }, [catId, user.uid, catsPath, showToast]);
 
-    // --- Handlery (logika biznesowa) ---
     const handleUpdateCat = async (updatedData) => {
         try {
             await updateDoc(doc(db, catsPath, catId), updatedData);
@@ -329,53 +322,44 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            <main className="container mx-auto p-4 grid lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1 flex flex-col gap-6">
-                    <CatProfile
-                        cat={cat}
-                        isEditing={isEditingProfile}
-                        onEditToggle={setIsEditingProfile}
-                        onUpdate={handleUpdateCat}
-                        onDeleteRequest={() => setIsDeletingCat(true)}
-                        collapsible={profileCollapsible}
-                    />
-                    <WeightTracker catId={catId} collapsible={weightCollapsible}/>
-                    <Tools
+            {/* 👇 ZMIANA TUTAJ: Dodajemy `flex-col` dla RWD i `lg:grid` dla desktopa 👇 */}
+            <main className="container mx-auto p-4 flex flex-col lg:grid lg:grid-cols-3 gap-6">
+                {/* Lewa kolumna (na RWD będzie na dole) */}
+                {/* 👇 ZMIANA TUTAJ: Dodajemy klasy `order-X` 👇 */}
+                <div className="lg:col-span-1 flex flex-col gap-6 order-4 lg:order-1">
+                    <div className="order-1 lg:order-1"><WeightTracker catId={catId} collapsible={weightCollapsible}/>
+                    </div>
+                    <div className="order-2 lg:order-2"><CatProfile cat={cat} isEditing={isEditingProfile}
+                                                                    onEditToggle={setIsEditingProfile}
+                                                                    onUpdate={handleUpdateCat}
+                                                                    onDeleteRequest={() => setIsDeletingCat(true)}
+                                                                    collapsible={profileCollapsible}/></div>
+                    <div className="order-3 lg:order-3"><Tools
                         onAccountSettingsClick={() => setIsAccountSettingsOpen(true)}
-                        onAddFoodClick={() => setIsAddingFood(true)}
-                        onManageFoodsClick={() => setIsManagingFoods(true)}
-                        onStatsClick={() => setIsShowingStats(true)}
-                        onExportClick={() => setIsExporting(true)}
+                        onAddFoodClick={() => setIsAddingFood(true)} onManageFoodsClick={() => setIsManagingFoods(true)}
+                        onStatsClick={() => setIsShowingStats(true)} onExportClick={() => setIsExporting(true)}
                         onLabResultsClick={() => setIsViewingLabResults(true)}
-                        onManageVetsClick={() => setIsVetModalOpen(true)}
-                        collapsible={toolsCollapsible}
-                    />
+                        onManageVetsClick={() => setIsVetModalOpen(true)} collapsible={toolsCollapsible}/></div>
                 </div>
 
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                    <DashboardStats
-                        historicalMeals={historicalMeals}
-                        historicalWeight={historicalWeight}
-                        isLoading={loadingHistory}
-                        collapsible={statsCollapsible}
-                    />
-                    <MealLog
-                        cat={cat}
-                        currentDate={currentDate}
-                        onDateChange={(offset) => setCurrentDate(d => {
-                            const newDate = new Date(d);
-                            newDate.setUTCDate(newDate.getUTCDate() + offset);
-                            return newDate.toISOString().split('T')[0];
-                        })}
-                        dailyData={dailyData}
-                        foods={visibleFoods}
-                        onAddMeal={handleAddMeal}
-                        onEditMeal={setMealToEdit}
-                        onDeleteMeal={handleDeleteMeal}
-                        collapsible={mealLogCollapsible}
-                        currentDer={calculateDer(cat)}
-                    />
-                    <HealthJournal catId={catId} currentDate={currentDate}/>
+                {/* Prawa kolumna (na RWD będzie na górze) */}
+                {/* 👇 ZMIANA TUTAJ: Dodajemy klasy `order-X` 👇 */}
+                <div className="lg:col-span-2 flex flex-col gap-6 order-1 lg:order-2">
+                    <div className="order-1 lg:order-1"><DashboardStats historicalMeals={historicalMeals}
+                                                                        historicalWeight={historicalWeight}
+                                                                        isLoading={loadingHistory}
+                                                                        collapsible={statsCollapsible}/></div>
+                    <div className="order-2 lg:order-2"><MealLog cat={cat} currentDate={currentDate}
+                                                                 onDateChange={(offset) => setCurrentDate(d => {
+                                                                     const newDate = new Date(d);
+                                                                     newDate.setUTCDate(newDate.getUTCDate() + offset);
+                                                                     return newDate.toISOString().split('T')[0];
+                                                                 })} dailyData={dailyData} foods={visibleFoods}
+                                                                 onAddMeal={handleAddMeal} onEditMeal={setMealToEdit}
+                                                                 onDeleteMeal={handleDeleteMeal}
+                                                                 collapsible={mealLogCollapsible}
+                                                                 currentDer={calculateDer(cat)}/></div>
+                    <div className="order-3 lg:order-3"><HealthJournal catId={catId} currentDate={currentDate}/></div>
                 </div>
             </main>
 

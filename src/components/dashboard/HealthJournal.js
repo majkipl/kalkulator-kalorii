@@ -7,16 +7,22 @@ import {userCatsCollectionPath, userVetsCollectionPath} from '../../firebase/pat
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
 
-// Importy komponentów podrzędnych i modali
+// Komponenty
 import DailyHealthLog from './DailyHealthLog';
 import VetVisitFormModal from '../modals/VetVisitFormModal';
 import ParasiteControlFormModal from '../modals/ParasiteControlFormModal';
 
-// Importy stylów i ikon
-import {typographyStyles} from '../../utils/formStyles';
-import {LucidePlusCircle, LucideTrash2, LucidePencil} from 'lucide-react';
-import FormError from '../../shared/FormError';
-
+// Style i ikony
+import {formStyles, typographyStyles} from '../../utils/formStyles';
+import {
+    LucidePlusCircle,
+    LucideTrash2,
+    LucidePencil,
+    LucideClipboardEdit,
+    LucideNotebookText,
+    LucideChevronDown
+} from 'lucide-react';
+import useCollapsible from '../../hooks/useCollapsible';
 
 const HealthJournal = ({catId, currentDate}) => {
     const {user} = useAuth();
@@ -28,9 +34,9 @@ const HealthJournal = ({catId, currentDate}) => {
     const [vetVisits, setVetVisits] = useState([]);
     const [vaccinations, setVaccinations] = useState([]);
     const [deworming, setDeworming] = useState([]);
-    const [vets, setVets] = useState([]); // Stan na listę weterynarzy
+    const [vets, setVets] = useState([]);
 
-    // Stan dla danych z bieżącego dnia (dla zakładki "Codzienne Objawy")
+    // Stan dla danych z bieżącego dnia
     const [dailyData, setDailyData] = useState({note: '', waterIntake: '', medications: '', symptomTags: []});
 
     // Stan do zarządzania otwieraniem modali
@@ -39,6 +45,8 @@ const HealthJournal = ({catId, currentDate}) => {
         vaccination: {isOpen: false, data: null},
         deworming: {isOpen: false, data: null}
     });
+
+    const journalCollapsible = useCollapsible(false);
 
     const catsPath = userCatsCollectionPath(user.uid);
     const vetsPath = userVetsCollectionPath(user.uid);
@@ -52,7 +60,6 @@ const HealthJournal = ({catId, currentDate}) => {
         const unsubVaccinations = onSnapshot(q('vaccinations'), snapshot => setVaccinations(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
         const unsubDeworming = onSnapshot(q('deworming'), snapshot => setDeworming(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
 
-        // Pobieranie listy weterynarzy
         const qVets = query(collection(db, vetsPath));
         const unsubVets = onSnapshot(qVets, snapshot => setVets(snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
 
@@ -83,7 +90,6 @@ const HealthJournal = ({catId, currentDate}) => {
         return () => unsubMeals();
     }, [catId, currentDate, catsPath]);
 
-    // Handlery do zapisu i usuwania
     const handleSave = async (subcollection, data, id) => {
         try {
             if (id) {
@@ -114,8 +120,11 @@ const HealthJournal = ({catId, currentDate}) => {
 
     const TabButton = ({tabName, label}) => (
         <button
-            onClick={() => setActiveTab(tabName)}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            onClick={(e) => {
+                e.stopPropagation();
+                setActiveTab(tabName);
+            }}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 activeTab === tabName
                     ? 'bg-indigo-500 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -128,117 +137,175 @@ const HealthJournal = ({catId, currentDate}) => {
     return (
         <>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-                    <h2 className={typographyStyles.h2}>Dziennik Zdrowia</h2>
-                    <div className="flex flex-wrap gap-2">
-                        <TabButton tabName="symptoms" label="Codzienne Objawy"/>
-                        <TabButton tabName="visits" label="Wizyty"/>
-                        <TabButton tabName="vaccinations" label="Szczepienia"/>
-                        <TabButton tabName="deworming" label="Odrobaczanie"/>
-                    </div>
+                <div {...journalCollapsible.triggerProps}>
+                    <h2 className={`${typographyStyles.h2} flex items-center`}>
+                        <LucideNotebookText className="mr-2 h-6 w-6 text-indigo-500"/>
+                        Dziennik Zdrowia
+                    </h2>
+                    <LucideChevronDown
+                        className={`h-6 w-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 lg:hidden ${journalCollapsible.isOpen ? 'rotate-180' : ''}`}/>
                 </div>
 
-                {activeTab === 'symptoms' && (
-                    <DailyHealthLog
-                        catId={catId}
-                        currentDate={currentDate}
-                        isEditing={isEditingDailyLog}
-                        setIsEditing={setIsEditingDailyLog}
-                        initialData={dailyData}
-                    />
-                )}
+                <div {...journalCollapsible.contentProps}>
+                    <div className="overflow-hidden pt-4">
+                        <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+                            <TabButton tabName="symptoms" label="Obserwacje"/>
+                            <TabButton tabName="visits" label="Wizyty"/>
+                            <TabButton tabName="vaccinations" label="Szczepienia"/>
+                            <TabButton tabName="deworming" label="Odrobaczanie"/>
+                        </div>
 
-                {activeTab === 'visits' && (
-                    <div>
-                        <button className="flex items-center text-indigo-500 mb-4"
-                                onClick={() => setModalState(s => ({...s, vetVisit: {isOpen: true, data: null}}))}>
-                            <LucidePlusCircle className="mr-2"/> Dodaj wizytę
-                        </button>
-                        {vetVisits.length > 0 ? vetVisits.map(visit => (
-                            <div key={visit.id} className="mb-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p>
-                                            <strong>{new Date(visit.date.seconds * 1000).toLocaleDateString()} - {visit.reason}</strong>
-                                        </p>
-                                        <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{visit.vetName}</p>
-                                        {visit.diagnosis && <p className="text-sm mt-1">Diagnoza: {visit.diagnosis}</p>}
-                                        {visit.recommendations &&
-                                            <p className="text-sm mt-1">Zalecenia: {visit.recommendations}</p>}
-                                    </div>
-                                    <div className="flex-shrink-0">
-                                        <button onClick={() => setModalState(s => ({
-                                            ...s,
-                                            vetVisit: {isOpen: true, data: visit}
-                                        }))} className="p-1"><LucidePencil size={16}/></button>
-                                        <button onClick={() => handleDelete('vetVisits', visit.id)}
-                                                className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
-                                    </div>
+                        {activeTab === 'symptoms' && (
+                            <div>
+                                <div className="flex justify-end mb-4">
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsEditingDailyLog(!isEditingDailyLog);
+                                    }} className={formStyles.buttonActionLight}>
+                                        <LucideClipboardEdit className="h-4 w-4 mr-2"/>
+                                        {isEditingDailyLog ? 'Anuluj edycję' : 'Edytuj dzisiejsze obserwacje'}
+                                    </button>
+                                </div>
+                                <DailyHealthLog
+                                    catId={catId}
+                                    currentDate={currentDate}
+                                    isEditing={isEditingDailyLog}
+                                    setIsEditing={setIsEditingDailyLog}
+                                    initialData={dailyData}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === 'visits' && (
+                            <div>
+                                <div className="flex justify-end mb-4">
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        setModalState(s => ({...s, vetVisit: {isOpen: true, data: null}}));
+                                    }} className={formStyles.buttonActionLight}>
+                                        <LucidePlusCircle className="h-4 w-4 mr-2"/> Dodaj wizytę
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {vetVisits.length > 0 ? vetVisits.map(visit => (
+                                        <div key={visit.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p>
+                                                        <strong>{new Date(visit.date.seconds * 1000).toLocaleDateString()} - {visit.reason}</strong>
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{visit.vetName}</p>
+                                                    {visit.diagnosis &&
+                                                        <p className="text-sm mt-1">Diagnoza: {visit.diagnosis}</p>}
+                                                    {visit.recommendations &&
+                                                        <p className="text-sm mt-1">Zalecenia: {visit.recommendations}</p>}
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setModalState(s => ({
+                                                            ...s,
+                                                            vetVisit: {isOpen: true, data: visit}
+                                                        }))
+                                                    }} className="p-1"><LucidePencil size={16}/></button>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete('vetVisits', visit.id)
+                                                    }} className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych
+                                        wizyt.</p>}
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych wizyt.</p>}
-                    </div>
-                )}
-                {activeTab === 'vaccinations' && (
-                    <div>
-                        <button className="flex items-center text-indigo-500 mb-4"
-                                onClick={() => setModalState(s => ({...s, vaccination: {isOpen: true, data: null}}))}>
-                            <LucidePlusCircle className="mr-2"/> Dodaj szczepienie
-                        </button>
-                        {vaccinations.length > 0 ? vaccinations.map(vac => (
-                            <div key={vac.id} className="mb-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p>
-                                            <strong>{new Date(vac.date.seconds * 1000).toLocaleDateString()} - {vac.productName}</strong>
-                                        </p>
-                                        {vac.nextDueDate &&
-                                            <p className="text-sm text-amber-600 dark:text-amber-400">Następna
-                                                dawka: {new Date(vac.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
-                                    </div>
-                                    <div className="flex-shrink-0">
-                                        <button onClick={() => setModalState(s => ({
-                                            ...s,
-                                            vaccination: {isOpen: true, data: vac}
-                                        }))} className="p-1"><LucidePencil size={16}/></button>
-                                        <button onClick={() => handleDelete('vaccinations', vac.id)}
-                                                className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
-                                    </div>
+                        )}
+                        {activeTab === 'vaccinations' && (
+                            <div>
+                                <div className="flex justify-end mb-4">
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        setModalState(s => ({...s, vaccination: {isOpen: true, data: null}}));
+                                    }} className={formStyles.buttonActionLight}>
+                                        <LucidePlusCircle className="h-4 w-4 mr-2"/> Dodaj szczepienie
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {vaccinations.length > 0 ? vaccinations.map(vac => (
+                                        <div key={vac.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p>
+                                                        <strong>{new Date(vac.date.seconds * 1000).toLocaleDateString()} - {vac.productName}</strong>
+                                                    </p>
+                                                    {vac.nextDueDate &&
+                                                        <p className="text-sm text-amber-600 dark:text-amber-400">Następna
+                                                            dawka: {new Date(vac.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setModalState(s => ({
+                                                            ...s,
+                                                            vaccination: {isOpen: true, data: vac}
+                                                        }))
+                                                    }} className="p-1"><LucidePencil size={16}/></button>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete('vaccinations', vac.id)
+                                                    }} className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych
+                                        szczepień.</p>}
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych szczepień.</p>}
-                    </div>
-                )}
-                {activeTab === 'deworming' && (
-                    <div>
-                        <button className="flex items-center text-indigo-500 mb-4"
-                                onClick={() => setModalState(s => ({...s, deworming: {isOpen: true, data: null}}))}>
-                            <LucidePlusCircle className="mr-2"/> Dodaj odrobaczanie
-                        </button>
-                        {deworming.length > 0 ? deworming.map(dew => (
-                            <div key={dew.id} className="mb-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p>
-                                            <strong>{new Date(dew.date.seconds * 1000).toLocaleDateString()} - {dew.productName}</strong>
-                                        </p>
-                                        {dew.nextDueDate &&
-                                            <p className="text-sm text-amber-600 dark:text-amber-400">Następna
-                                                dawka: {new Date(dew.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
-                                    </div>
-                                    <div className="flex-shrink-0">
-                                        <button onClick={() => setModalState(s => ({
-                                            ...s,
-                                            deworming: {isOpen: true, data: dew}
-                                        }))} className="p-1"><LucidePencil size={16}/></button>
-                                        <button onClick={() => handleDelete('deworming', dew.id)}
-                                                className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
-                                    </div>
+                        )}
+                        {activeTab === 'deworming' && (
+                            <div>
+                                <div className="flex justify-end mb-4">
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        setModalState(s => ({...s, deworming: {isOpen: true, data: null}}));
+                                    }} className={formStyles.buttonActionLight}>
+                                        <LucidePlusCircle className="h-4 w-4 mr-2"/> Dodaj odrobaczanie
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {deworming.length > 0 ? deworming.map(dew => (
+                                        <div key={dew.id} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p>
+                                                        <strong>{new Date(dew.date.seconds * 1000).toLocaleDateString()} - {dew.productName}</strong>
+                                                    </p>
+                                                    {dew.nextDueDate &&
+                                                        <p className="text-sm text-amber-600 dark:text-amber-400">Następna
+                                                            dawka: {new Date(dew.nextDueDate.seconds * 1000).toLocaleDateString()}</p>}
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setModalState(s => ({
+                                                            ...s,
+                                                            deworming: {isOpen: true, data: dew}
+                                                        }))
+                                                    }} className="p-1"><LucidePencil size={16}/></button>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete('deworming', dew.id)
+                                                    }} className="p-1 text-red-500"><LucideTrash2 size={16}/></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych
+                                        odrobaczeń.</p>}
                                 </div>
                             </div>
-                        )) : <p className="text-sm text-gray-500 text-center py-4">Brak zapisanych odrobaczeń.</p>}
+                        )}
                     </div>
-                )}
+                </div>
             </div>
 
             {modalState.vetVisit.isOpen && <VetVisitFormModal
