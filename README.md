@@ -1,78 +1,62 @@
-# Kalkulator Kalorii
+# Koci Dziennik Zdrowia
 
-![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+Kompleksowa, responsywna aplikacja do monitorowania zdrowia, diety i historii Twojego kota, zbudowana przy użyciu **React** oraz **Tailwind CSS**.
 
-Nowoczesna aplikacja internetowa do obliczania dziennego zapotrzebowania kalorycznego, zbudowana przy użyciu React i stylizowana za pomocą Tailwind CSS.
+## Opis
 
+Koci Dziennik Zdrowia to zaawansowane narzędzie stworzone z myślą o świadomych opiekunach kotów. Aplikacja pozwala nie tylko na precyzyjne obliczenie dziennego zapotrzebowania kalorycznego, ale również na prowadzenie szczegółowego dziennika zdrowia i rozwoju Twojego pupila.
 
+Głównym celem aplikacji jest zebranie wszystkich kluczowych informacji o kocie w jednym, łatwo dostępnym miejscu, co ułatwia dbanie o jego dobrostan i wspiera podczas wizyt weterynaryjnych.
 
-## 🚀 Demo na Żywo
+## Główne Funkcjonalności
 
-**[może później]**
+Aplikacja składa się z kilku modułów, które razem tworzą kompletny system do zarządzania zdrowiem kota:
 
-## Funkcje
+### 1\. Kalkulator Kalorii
 
-- **Obliczanie BMR:** Wylicza podstawową przemianę materii na podstawie wzoru Mifflina-St Jeora.
-- **Obliczanie TDEE:** Wylicza całkowite dzienne zapotrzebowanie na kalorie, uwzględniając poziom aktywności fizycznej.
-- **Responsywny Design:** Interfejs dopasowuje się do urządzeń mobilnych i desktopowych.
-- **Interaktywny Interfejs:** Natychmiastowe wyniki bez przeładowywania strony.
+* **Precyzyjne Obliczenia:** Automatycznie oblicza dzienne zapotrzebowanie kaloryczne na podstawie wagi kota oraz jego poziomu aktywności (uwzględniając sterylizację).
+* **Wsparcie w Diecie:** Pomaga w utrzymaniu prawidłowej wagi i zapobiega otyłości lub niedowadze.
 
----
+### 2\. Historia Wagi
 
-## 🛠️ Tech Stack
+* **Monitorowanie Zmian:** Umożliwia regularne zapisywanie wagi kota i śledzenie jej zmian na przestrzeni czasu.
+* **Wykresy (w planach):** Wizualizacja danych w postaci wykresów, aby łatwiej zauważyć tendencje wzrostowe lub spadkowe.
 
-- **Framework:** [React](https://reactjs.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+### 3\. Dziennik Zdrowia
 
----
+Kompleksowy moduł do notowania wszystkich ważnych wydarzeń zdrowotnych:
 
-## Instalacja i Uruchomienie
+* **Obserwacje:** Miejsce na zapisywanie codziennych spostrzeżeń dotyczących zachowania, apetytu czy samopoczucia kota.
+* **Wizyty u Weterynarza:** Rejestrowanie dat wizyt, diagnoz, zaleceń lekarskich oraz przepisanych leków.
+* **Szczepienia:** Prowadzenie ewidencji wykonanych szczepień, wraz z datami i rodzajem szczepionki.
+* **Odrobaczanie:** Notowanie terminów i zastosowanych preparatów przeciw pasożytom.
 
-Aby uruchomić projekt lokalnie, postępuj zgodnie z poniższymi krokami.
+## Technologie
 
-1.  **Sklonuj repozytorium:**
+* [**React**](https://reactjs.org/) - Biblioteka JavaScript do budowania dynamicznych i interaktywnych interfejsów użytkownika.
+* [**Tailwind CSS**](https://tailwindcss.com/) - Nowoczesny framework CSS, który pozwala na szybkie i elastyczne stylowanie komponentów.
+
+## Użycie
+
+Aplikacja jest intuicyjna w obsłudze. Po uruchomieniu możesz swobodnie przełączać się między modułami, aby obliczyć kalorie, dodać nowy wpis do dziennika zdrowia czy zaktualizować wagę swojego kota.
+
+## Instalacja i uruchomienie lokalne
+
+1.  Sklonuj repozytorium na swój dysk:
     ```bash
-    git clone [https://github.com/majkipl/kalkulator-kalorii.git](https://github.com/majkipl/kalkulator-kalorii.git)
+    git clone https://github.com/majkipl/kalkulator-kalorii.git
     ```
-
-2.  **Przejdź do katalogu projektu:**
+2.  Przejdź do katalogu głównego projektu:
     ```bash
     cd kalkulator-kalorii
     ```
-
-3.  **Zainstaluj zależności:**
+3.  Zainstaluj wszystkie wymagane zależności:
     ```bash
     npm install
     ```
-
-4.  **Uruchom serwer deweloperski:**
+4.  Uruchom aplikację w trybie deweloperskim:
     ```bash
-    npm run dev
+    npm start
     ```
-    Aplikacja będzie dostępna pod adresem `http://localhost:5173` (lub innym, wskazanym w konsoli).
 
----
-
-## Dostępne Skrypty
-
-- `npm run dev`: Uruchamia aplikację w trybie deweloperskim.
-- `npm run build`: Buduje aplikację do folderu `dist` w celu wdrożenia na produkcję.
-- `npm run preview`: Uruchamia lokalny serwer do podglądu produkcyjnej wersji aplikacji.
-
----
-
-## Wdrożenie (Deployment)
-
-Aplikację można łatwo wdrożyć na platformach takich jak:
-
-- [Vercel](https://vercel.com/)
-- [Netlify](https://www.netlify.com/)
-
-Platformy te zazwyczaj automatycznie wykrywają, że jest to projekt Vite/React i konfigurują proces budowania i wdrożenia.
-
----
-
-## Licencja
-
-Projekt udostępniany na licencji MIT. Zobacz plik `LICENSE`, aby uzyskać więcej informacji.
+Aplikacja zostanie uruchomiona i będzie dostępna w przeglądarce pod adresem `http://localhost:3000`.
