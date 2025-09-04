@@ -3,3 +3,5 @@
 .env.backup
 package-lock.json
 /build/
+/merge.js
+/merge.css
