@@ -1,13 +1,11 @@
 // /src/components/CatProfileForm.js
 
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {catProfileSchema} from '../schemas/catProfileSchema';
 import Select from 'react-select';
 import {LucideSave, LucideTrash2} from 'lucide-react';
-
-// Importy z projektu
 import {useAppContext} from '../context/AppContext';
 import {formStyles, getCustomSelectStyles, typographyStyles} from '../utils/formStyles';
 import {
@@ -16,23 +14,13 @@ import {
     physiologicalStateOptions,
     chronicDiseaseOptions
 } from '../config/options';
+import FormError from '../shared/FormError';
 
-/**
- * Mały komponent pomocniczy do wyświetlania błędów walidacji.
- * @param {{message: string}} props
- */
-const FormError = ({message}) => {
-    if (!message) return null;
-    return <p className="text-sm text-red-500 mt-1">{message}</p>;
-};
-
-const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
+const CatProfileForm = ({cat, onSubmit, onCancel, onDeleteRequest}) => {
     const {isDark} = useAppContext();
-
-    // 1. Tworzymy referencję do pierwszego pola formularza
     const firstInputRef = useRef(null);
 
-    const {register, handleSubmit, control, formState: {errors}, reset} = useForm({
+    const {register, handleSubmit, control, formState: {errors}, reset, watch} = useForm({
         resolver: zodResolver(catProfileSchema),
         defaultValues: {
             name: cat?.name || '',
@@ -48,15 +36,16 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
         }
     });
 
-    // 2. Efekt, który ustawi focus na pierwszym polu, gdy formularz jest w trybie tworzenia nowego kota
+    const yearsValue = watch("years");
+    const { ref: nameRef, ...nameRest } = register("name");
+
     useEffect(() => {
-        // Sprawdzamy, czy `cat` nie istnieje (tryb tworzenia)
         if (!cat && firstInputRef.current) {
             setTimeout(() => {
                 firstInputRef.current.focus();
             }, 100);
         }
-    }, [cat]); // Efekt uruchomi się, gdy zmieni się prop `cat`
+    }, [cat]);
 
     useEffect(() => {
         if (cat) {
@@ -77,36 +66,33 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
 
     const customSelectStyles = getCustomSelectStyles(isDark);
 
-    const processSubmit = (data) => {
-        const finalAge = parseInt(data.years, 10) + (parseInt(data.months, 10) / 12);
-
+    const processAndSubmit = (data) => {
+        const finalAge = (data.years || 0) + ((data.months || 0) / 12);
         const dataToSave = {
-            name: data.name,
-            currentWeight: parseFloat(data.currentWeight) || 0,
-            targetWeight: parseFloat(data.targetWeight) || 0,
-            isNeutered: data.isNeutered,
-            activityLevel: data.activityLevel,
-            physiologicalState: data.physiologicalState,
-            chronicDisease: data.chronicDisease,
-            breed: data.breed,
+            ...data,
             age: finalAge,
+            currentWeight: Number(data.currentWeight),
+            targetWeight: Number(data.targetWeight)
         };
-        onSave(dataToSave);
+        onSubmit(dataToSave);
     };
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-fade-in">
-            <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(processAndSubmit)} className="space-y-4">
                 <h2 className={`${typographyStyles.h2} mb-4`}>{cat ? 'Edytuj profil' : 'Stwórz nowy profil'}</h2>
 
                 <div>
                     <label className={typographyStyles.label}>Nazwa kota</label>
                     <input
                         type="text"
-                        {...register("name")}
+                        {...nameRest}
+                        ref={(e) => {
+                            nameRef(e);
+                            firstInputRef.current = e;
+                        }}
                         className={formStyles.input}
-                        ref={firstInputRef} // 3. Dowiązujemy ref
-                        aria-invalid={errors.name ? "true" : "false"}
+                        aria-invalid={!!errors.name}
                     />
                     <FormError message={errors.name?.message}/>
                 </div>
@@ -119,7 +105,7 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                             step="0.01"
                             {...register("currentWeight")}
                             className={formStyles.input}
-                            aria-invalid={errors.currentWeight ? "true" : "false"}
+                            aria-invalid={!!errors.currentWeight}
                         />
                         <FormError message={errors.currentWeight?.message}/>
                     </div>
@@ -131,33 +117,36 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                             {...register("targetWeight")}
                             className={formStyles.input}
                             placeholder="Opcjonalnie"
-                            aria-invalid={errors.targetWeight ? "true" : "false"}
+                            aria-invalid={!!errors.targetWeight}
                         />
                         <FormError message={errors.targetWeight?.message}/>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className={typographyStyles.label}>Wiek (lata)</label>
                         <input
                             type="number"
                             {...register("years")}
                             className={formStyles.input}
-                            aria-invalid={errors.years ? "true" : "false"}
+                            aria-invalid={!!errors.years}
                         />
                         <FormError message={errors.years?.message}/>
                     </div>
-                    <div>
-                        <label className={typographyStyles.label}>Miesiące</label>
-                        <input
-                            type="number"
-                            {...register("months")}
-                            className={formStyles.input}
-                            aria-invalid={errors.months ? "true" : "false"}
-                        />
-                        <FormError message={errors.months?.message}/>
-                    </div>
+
+                    {Number(yearsValue) === 0 && (
+                        <div>
+                            <label className={typographyStyles.label}>Miesiące</label>
+                            <input
+                                type="number"
+                                {...register("months")}
+                                className={formStyles.input}
+                                aria-invalid={!!errors.months}
+                            />
+                            <FormError message={errors.months?.message}/>
+                        </div>
+                    )}
                 </div>
 
                 <div>
@@ -173,7 +162,7 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
-                                aria-invalid={errors.breed ? "true" : "false"}
+                                aria-invalid={!!errors.breed}
                             />
                         )}
                     />
@@ -193,7 +182,7 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
-                                aria-invalid={errors.activityLevel ? "true" : "false"}
+                                aria-invalid={!!errors.activityLevel}
                             />
                         )}
                     />
@@ -213,7 +202,7 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
-                                aria-invalid={errors.physiologicalState ? "true" : "false"}
+                                aria-invalid={!!errors.physiologicalState}
                             />
                         )}
                     />
@@ -233,7 +222,7 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
                                 onChange={val => field.onChange(val.value)}
                                 styles={customSelectStyles}
                                 className="mt-1"
-                                aria-invalid={errors.chronicDisease ? "true" : "false"}
+                                aria-invalid={!!errors.chronicDisease}
                             />
                         )}
                     />
@@ -248,7 +237,11 @@ const CatProfileForm = ({cat, onSave, onCancel, onDeleteRequest}) => {
 
                 <div className="flex justify-end space-x-3 pt-4">
                     <button type="button" onClick={onCancel} className={formStyles.buttonCancel}>Anuluj</button>
-                    <button type="submit" className={formStyles.buttonSubmit}>
+                    <button
+                        type="submit"
+                        className={formStyles.buttonSubmit}
+                        data-cy="profile-save-button"
+                    >
                         <LucideSave className="mr-2 h-4 w-4"/> Zapisz
                     </button>
                 </div>

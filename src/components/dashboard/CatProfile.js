@@ -41,7 +41,8 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
         return (
             <CatProfileForm
                 cat={cat}
-                onSave={onUpdate}
+                // 👇 ZMIANA: Przekazujemy 'onUpdate' bezpośrednio jako 'onSubmit'
+                onSubmit={onUpdate}
                 onCancel={() => onEditToggle(false)}
                 theme={theme}
                 onDeleteRequest={onDeleteRequest}
@@ -60,6 +61,7 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
                         e.stopPropagation();
                         onEditToggle(true);
                     }}
+                            aria-label="Edytuj"
                             className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                         <LucideClipboardEdit className="h-5 w-5"/>
                     </button>

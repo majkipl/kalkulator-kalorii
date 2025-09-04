@@ -102,6 +102,7 @@ const MealLog = ({
                                                     className="p-2 text-gray-400 hover:text-indigo-500 rounded-full hover:bg-indigo-100 dark:hover:bg-gray-600 transition">
                                                 <LucideClipboardEdit className="h-4 w-4"/></button>
                                             <button onClick={() => onDeleteMeal(meal.id)}
+                                                    aria-label="Usuń posiłek"
                                                     className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-gray-600 transition">
                                                 <LucideTrash2 className="h-4 w-4"/></button>
                                         </div>

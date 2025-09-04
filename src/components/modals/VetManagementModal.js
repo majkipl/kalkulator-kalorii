@@ -8,7 +8,7 @@ import {collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc} from '
 import {db} from '../../firebase/config';
 import {useAuth} from '../../context/AuthContext';
 import {useAppContext} from '../../context/AppContext';
-import {userVetsCollectionPath} from '../../firebase/paths'; // Potrzebujemy nowej ścieżki
+import {userVetsCollectionPath} from '../../firebase/paths';
 import {formStyles, typographyStyles} from '../../utils/formStyles';
 import FormError from '../../shared/FormError';
 import {LucideX, LucidePlusCircle, LucideTrash2, LucidePencil, LucideBookMarked} from 'lucide-react';

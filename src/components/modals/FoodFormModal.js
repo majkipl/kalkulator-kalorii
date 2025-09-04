@@ -11,23 +11,12 @@ import {LucideX, LucideCat} from 'lucide-react';
 import {useAppContext} from '../../context/AppContext';
 import {formStyles, getCustomSelectStyles, typographyStyles} from '../../utils/formStyles';
 import {foodTypeOptions} from '../../config/options';
-
-/**
- * Mały komponent pomocniczy do wyświetlania błędów walidacji.
- * @param {{message: string}} props
- */
-const FormError = ({message}) => {
-    if (!message) return null;
-    return <p className="text-sm text-red-500 mt-1">{message}</p>;
-};
-
+import FormError from '../../shared/FormError';
 
 const FoodFormModal = ({onSave, onCancel, initialData}) => {
     const {isDark, showToast} = useAppContext();
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef(null);
-
-    // 1. Tworzymy referencję do pierwszego pola formularza
     const firstInputRef = useRef(null);
 
     const {register, handleSubmit, control, formState: {errors}, reset, setValue, watch} = useForm({
@@ -40,9 +29,11 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
         }
     });
 
+    // Wyciągamy ref i resztę właściwości z `register` dla pola "name"
+    const {ref: nameRef, ...nameRest} = register("name");
     const photoURL = watch('photoURL');
 
-    // 2. Efekt, który ustawi focus, gdy komponent się zamontuje
+    // Efekt, który ustawi focus, gdy komponent się zamontuje
     useEffect(() => {
         setTimeout(() => {
             firstInputRef.current?.focus();
@@ -110,8 +101,8 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
         };
     };
 
-    const processSubmit = (data) => {
-        onSave({...data, calories: parseInt(data.calories, 10) || 0});
+    const processSubmit = async (data) => {
+        await onSave({...data, calories: parseInt(data.calories, 10) || 0});
     };
 
     return (
@@ -149,9 +140,12 @@ const FoodFormModal = ({onSave, onCancel, initialData}) => {
                         <label className={typographyStyles.label}>Nazwa karmy</label>
                         <input
                             type="text"
-                            {...register("name")}
+                            {...nameRest}
+                            ref={(e) => {
+                                nameRef(e);
+                                firstInputRef.current = e;
+                            }}
                             className={formStyles.input}
-                            ref={firstInputRef} // 3. Dowiązujemy ref
                             aria-invalid={errors.name ? "true" : "false"}
                         />
                         <FormError message={errors.name?.message}/>

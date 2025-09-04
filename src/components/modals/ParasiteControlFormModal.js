@@ -5,7 +5,6 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {parasiteControlSchema} from '../../schemas/parasiteControlSchema';
 import {LucideX} from 'lucide-react';
-import {useAppContext} from '../../context/AppContext';
 import {formStyles, typographyStyles} from '../../utils/formStyles';
 import FormError from '../../shared/FormError';
 

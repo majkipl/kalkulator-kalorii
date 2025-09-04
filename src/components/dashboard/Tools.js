@@ -16,7 +16,7 @@ const Tools = ({
                    onStatsClick,
                    onExportClick,
                    onLabResultsClick,
-                   onManageVetsClick, // Nowy prop dla modala weterynarzy
+                   onManageVetsClick,
                    collapsible
                }) => {
     return (

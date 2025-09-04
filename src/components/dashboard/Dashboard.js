@@ -165,8 +165,13 @@ const Dashboard = () => {
 
     const handleUpdateCat = async (updatedData) => {
         try {
+            // Krok 1: Wykonaj operację zapisu w bazie danych
             await updateDoc(doc(db, catsPath, catId), updatedData);
+
+            // Krok 2: Jeśli zapis się udał, zamknij formularz edycji
             setIsEditingProfile(false);
+
+            // Krok 3: Pokaż komunikat o sukcesie
             showToast("Profil kota został zaktualizowany.");
         } catch (error) {
             showToast("Błąd podczas aktualizacji profilu.", "error");

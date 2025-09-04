@@ -121,8 +121,12 @@ const WeightTracker = ({catId, collapsible}) => {
                                 />
                                 <FormError message={errors.newWeight?.message}/>
                             </div>
-                            <button type="submit"
-                                    className={`${formStyles.buttonSubmit} w-full sm:w-auto text-sm`}>Zapisz
+                            <button
+                                type="submit"
+                                className={`${formStyles.buttonSubmit} w-full sm:w-auto text-sm`}
+                                data-cy="weight-save-button"
+                            >
+                                Zapisz
                             </button>
                         </form>
                     </div>
