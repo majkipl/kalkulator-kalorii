@@ -7,7 +7,7 @@ import {
     LucideBookUser, LucideClipboardEdit, LucideChevronDown, LucideCat, LucideWeight,
     LucideTarget, LucideSprout, LucideBone, LucideActivity, LucideHeartPulse, LucideStethoscope
 } from 'lucide-react';
-import {typographyStyles} from "../../utils/formStyles";
+import {typographyStyles, formStyles} from "../../utils/formStyles";
 
 const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, theme, collapsible}) => {
     const physiologicalStateText = {
@@ -41,7 +41,6 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
         return (
             <CatProfileForm
                 cat={cat}
-                // 👇 ZMIANA: Przekazujemy 'onUpdate' bezpośrednio jako 'onSubmit'
                 onSubmit={onUpdate}
                 onCancel={() => onEditToggle(false)}
                 theme={theme}
@@ -57,16 +56,8 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
                     <LucideBookUser className="mr-2 h-6 w-6 text-indigo-500"/> Profil kota
                 </h2>
                 <div className="flex items-center">
-                    <button onClick={(e) => {
-                        e.stopPropagation();
-                        onEditToggle(true);
-                    }}
-                            aria-label="Edytuj"
-                            className="p-2 text-gray-500 dark:text-gray-400 hover:text-indigo-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                        <LucideClipboardEdit className="h-5 w-5"/>
-                    </button>
                     <LucideChevronDown
-                        className={`h-6 w-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 lg:hidden ${collapsible.isOpen ? 'rotate-180' : ''}`}/>
+                        className={`h-6 w-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${collapsible.isOpen ? 'rotate-180' : ''}`}/>
                 </div>
             </div>
             <div {...collapsible.contentProps}>
@@ -104,6 +95,17 @@ const CatProfile = ({cat, isEditing, onEditToggle, onUpdate, onDeleteRequest, th
                             przewlekła:</strong> <span
                             className="ml-auto font-medium">{chronicDiseaseText[cat.chronicDisease] || 'Brak'}</span>
                         </p>
+                    </div>
+
+                    <div className="mt-4">
+                        <button
+                            onClick={() => onEditToggle(true)}
+                            data-cy="profile-edit-button"
+                            className={formStyles.buttonSecondary}
+                        >
+                            <LucideClipboardEdit className="mr-2 h-4 w-4"/>
+                            Edytuj Profil
+                        </button>
                     </div>
                 </div>
             </div>

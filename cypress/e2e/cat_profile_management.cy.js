@@ -22,7 +22,8 @@ describe('Zarządzanie profilem kota', () => {
         cy.get('input[name="name"]').type(newCatName);
         cy.get('input[name="currentWeight"]').type('4');
         cy.get('input[name="years"]').type('2');
-        cy.contains('button', 'Zapisz').click();
+        // Używamy data-cy, aby upewnić się, że klikamy właściwy przycisk zapisu
+        cy.get('[data-cy="profile-save-button"]').click();
 
         // --- Asercja po stworzeniu ---
         cy.contains('button', newCatName, {timeout: 10000}).should('be.visible');
@@ -32,13 +33,16 @@ describe('Zarządzanie profilem kota', () => {
         cy.url().should('include', '/dashboard');
 
         // --- Usunięcie ---
-        const profileSection = cy.get('h2').contains('Profil kota').parent();
-        profileSection.should('be.visible'); // Upewnij się, że sekcja jest widoczna
-        profileSection.find('button[aria-label="Edytuj"]').click(); // Teraz ten selektor zadziała
+        // 👇 ZMIANA ZACZYNA SIĘ TUTAJ
+        // Krok 1: Rozwiń sekcję profilu, aby przycisk edycji stał się widoczny
+        cy.contains('h2', 'Profil kota').click();
+
+        // Krok 2: Kliknij nowy, poprawny przycisk edycji, aby otworzyć formularz
+        cy.get('[data-cy="profile-edit-button"]').click();
+        // KONIEC ZMIANY 👆
 
         cy.contains('button', 'Usuń Profil Kota').click();
 
-        // Używamy hasła zdefiniowanego na górze
         cy.get('input[placeholder="Twoje hasło"]').type(user.password);
         cy.contains('button', 'Potwierdź usunięcie').click();
 

@@ -1,5 +1,3 @@
-// /src/components/CatProfileForm.js
-
 import React, {useRef, useEffect} from 'react';
 import {useForm, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -37,7 +35,7 @@ const CatProfileForm = ({cat, onSubmit, onCancel, onDeleteRequest}) => {
     });
 
     const yearsValue = watch("years");
-    const { ref: nameRef, ...nameRest } = register("name");
+    const {ref: nameRef, ...nameRest} = register("name");
 
     useEffect(() => {
         if (!cat && firstInputRef.current) {
@@ -66,15 +64,20 @@ const CatProfileForm = ({cat, onSubmit, onCancel, onDeleteRequest}) => {
 
     const customSelectStyles = getCustomSelectStyles(isDark);
 
-    const processAndSubmit = (data) => {
+    const processAndSubmit = async (data) => {
         const finalAge = (data.years || 0) + ((data.months || 0) / 12);
         const dataToSave = {
             ...data,
             age: finalAge,
             currentWeight: Number(data.currentWeight),
-            targetWeight: Number(data.targetWeight)
+            targetWeight: data.targetWeight ? Number(data.targetWeight) : ''
         };
-        onSubmit(dataToSave);
+
+        const success = await onSubmit(dataToSave);
+
+        if (success) {
+            onCancel();
+        }
     };
 
     return (

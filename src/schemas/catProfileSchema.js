@@ -12,17 +12,13 @@ export const catProfileSchema = z.object({
     currentWeight: z.coerce.number({invalid_type_error: "Waga musi być liczbą."})
         .positive("Waga musi być liczbą dodatnią.")
         .max(20, "Waga nie może przekraczać 20 kg."),
-
-    // 👇 ZMIANA TUTAJ: Nowa, poprawna logika dla opcjonalnej wagi docelowej
-    targetWeight: z.union([
-        z.string().length(0), // Akceptuj pusty string
-        z.coerce.number()
+    targetWeight: z.preprocess(
+        (val) => (val === "" ? undefined : val), // Jeśli jest pusty string, traktuj jako 'undefined'
+        z.coerce.number({invalid_type_error: "Waga musi być liczbą."})
             .positive("Waga musi być liczbą dodatnią.")
             .max(20, "Waga nie może przekraczać 20 kg.")
-    ]).optional().or(z.literal('')), // Upewnij się, że jest opcjonalne
-    // Koniec zmiany 👆
-
-    // ... reszta pól bez zmian
+            .optional() // Uczyń całe pole opcjonalnym
+    ),
     breed: z.string({required_error: "Musisz wybrać rasę."}),
     activityLevel: z.string({required_error: "Musisz wybrać poziom aktywności."}),
     physiologicalState: z.string({required_error: "Musisz wybrać stan fizjologiczny."}),

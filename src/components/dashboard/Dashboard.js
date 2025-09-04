@@ -1,5 +1,3 @@
-// /src/components/dashboard/Dashboard.js
-
 import React, {useState, useEffect, useMemo} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {signOut} from 'firebase/auth';
@@ -165,16 +163,12 @@ const Dashboard = () => {
 
     const handleUpdateCat = async (updatedData) => {
         try {
-            // Krok 1: Wykonaj operację zapisu w bazie danych
             await updateDoc(doc(db, catsPath, catId), updatedData);
-
-            // Krok 2: Jeśli zapis się udał, zamknij formularz edycji
-            setIsEditingProfile(false);
-
-            // Krok 3: Pokaż komunikat o sukcesie
             showToast("Profil kota został zaktualizowany.");
+            return true;
         } catch (error) {
             showToast("Błąd podczas aktualizacji profilu.", "error");
+            return false;
         }
     };
 
@@ -327,10 +321,7 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            {/* 👇 ZMIANA TUTAJ: Dodajemy `flex-col` dla RWD i `lg:grid` dla desktopa 👇 */}
             <main className="container mx-auto p-4 flex flex-col lg:grid lg:grid-cols-3 gap-6">
-                {/* Lewa kolumna (na RWD będzie na dole) */}
-                {/* 👇 ZMIANA TUTAJ: Dodajemy klasy `order-X` 👇 */}
                 <div className="lg:col-span-1 flex flex-col gap-6 order-4 lg:order-1">
                     <div className="order-1 lg:order-1"><WeightTracker catId={catId} collapsible={weightCollapsible}/>
                     </div>
@@ -338,6 +329,7 @@ const Dashboard = () => {
                                                                     onEditToggle={setIsEditingProfile}
                                                                     onUpdate={handleUpdateCat}
                                                                     onDeleteRequest={() => setIsDeletingCat(true)}
+                                                                    theme={theme}
                                                                     collapsible={profileCollapsible}/></div>
                     <div className="order-3 lg:order-3"><Tools
                         onAccountSettingsClick={() => setIsAccountSettingsOpen(true)}
@@ -347,8 +339,6 @@ const Dashboard = () => {
                         onManageVetsClick={() => setIsVetModalOpen(true)} collapsible={toolsCollapsible}/></div>
                 </div>
 
-                {/* Prawa kolumna (na RWD będzie na górze) */}
-                {/* 👇 ZMIANA TUTAJ: Dodajemy klasy `order-X` 👇 */}
                 <div className="lg:col-span-2 flex flex-col gap-6 order-1 lg:order-2">
                     <div className="order-1 lg:order-1"><DashboardStats historicalMeals={historicalMeals}
                                                                         historicalWeight={historicalWeight}
