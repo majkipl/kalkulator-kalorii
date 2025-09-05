@@ -70,7 +70,7 @@ const CatProfileForm = ({cat, onSubmit, onCancel, onDeleteRequest}) => {
             ...data,
             age: finalAge,
             currentWeight: Number(data.currentWeight),
-            targetWeight: data.targetWeight ? Number(data.targetWeight) : ''
+            targetWeight: data.targetWeight ? Number(data.targetWeight) : Number(data.currentWeight)
         };
 
         const success = await onSubmit(dataToSave);
