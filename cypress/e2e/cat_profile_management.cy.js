@@ -1,4 +1,4 @@
-// cypress/e2e/cat_profile_management.cy.js
+// /cypress/e2e/cat_profile_management.cy.js
 
 import '../support/commands';
 
@@ -32,14 +32,11 @@ describe('Zarządzanie profilem kota', () => {
         cy.contains('button', newCatName).click();
         cy.url().should('include', '/dashboard');
 
-        // --- Usunięcie ---
-        // 👇 ZMIANA ZACZYNA SIĘ TUTAJ
-        // Krok 1: Rozwiń sekcję profilu, aby przycisk edycji stał się widoczny
+        // Rozwiń sekcję profilu, aby przycisk edycji stał się widoczny
         cy.contains('h2', 'Profil kota').click();
 
-        // Krok 2: Kliknij nowy, poprawny przycisk edycji, aby otworzyć formularz
+        // Kliknij nowy, poprawny przycisk edycji, aby otworzyć formularz
         cy.get('[data-cy="profile-edit-button"]').click();
-        // KONIEC ZMIANY 👆
 
         cy.contains('button', 'Usuń Profil Kota').click();
 

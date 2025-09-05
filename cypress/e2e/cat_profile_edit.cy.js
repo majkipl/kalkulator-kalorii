@@ -171,12 +171,6 @@ describe('Edycja i walidacja profilu kota', () => {
                 cy.contains('Waga musi być liczbą dodatnią.').should('be.visible');
             });
 
-            // --- POPRAWIONY TEST ---
-            // Ten test wykrył błąd w logice aplikacji.
-            // Do czasu naprawy błędu, test powinien sprawdzać obecne zachowanie,
-            // czyli zapisanie profilu i brak komunikatu o błędzie.
-            // Po naprawie logiki aplikacji, należy przywrócić pierwotną asercję:
-            // cy.contains('Waga musi być liczbą dodatnią.').should('be.visible');
             it('powinien zignorować nieliczbową wagę docelową i zapisać profil (tymczasowe obejście błędu aplikacji)', () => {
                 cy.get('input[name="targetWeight"]').clear().type('abc');
                 cy.get('[data-cy="profile-save-button"]').click({force: true});
@@ -205,9 +199,6 @@ describe('Edycja i walidacja profilu kota', () => {
                 cy.contains('Miesiące muszą być w zakresie od 0 do 11.').should('be.visible');
             });
 
-            // --- POPRAWIONY TEST ---
-            // Najpierw ustawiamy lata na 0, aby pole miesięcy było widoczne,
-            // a dopiero potem wpisujemy w nie błędną wartość.
             it('powinien wyświetlić błąd, gdy wiek w miesiącach jest ujemny', () => {
                 cy.get('input[name="years"]').clear().type('0');
                 cy.get('input[name="months"]').should('be.visible').clear().type('-1');
